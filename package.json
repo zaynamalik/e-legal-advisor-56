@@ -1,0 +1,23 @@
+{
+  "name": "elegal-advisor-backend",
+  "version": "1.0.0",
+  "description": "E-Legal Advisor Backend API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^9.6.0",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "jsonwebtoken": "^9.0.3",
+    "nedb": "^1.8.0",
+    "sql.js": "^1.14.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

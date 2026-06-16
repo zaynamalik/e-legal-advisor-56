@@ -1,0 +1,2534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>E-Legal Advisor | Pakistan AI Legal Assistant (Mobile)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Leaflet CSS + JS for real map (Helplines) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    /* ----- YOUR ORIGINAL STYLES (unchanged) ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 10% 20%, #0a0f1e, #03060f);
+      color: #eef2ff;
+      line-height: 1.4;
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.2s;
+    }
+
+    /* Light mode styles */
+    body.light-mode {
+      background: radial-gradient(circle at 10% 20%, #e2e8f0, #cbd5e1);
+      color: #0f172a;
+    }
+    body.light-mode .brand h1 {
+      background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    body.light-mode .sub-badge, body.light-mode .feature-card, body.light-mode .auth-section,
+    body.light-mode .dashboard-container, body.light-mode .dashboard-sidebar,
+    body.light-mode .dashboard-card, body.light-mode .chat-container,
+    body.light-mode .bot-message, body.light-mode .user-message,
+    body.light-mode .learner-categories, body.light-mode .learner-detail,
+    body.light-mode .helpline-card, body.light-mode .guidance-card,
+    body.light-mode .fir-form, body.light-mode .fir-sidebar,
+    body.light-mode .settings-profile, body.light-mode .settings-item,
+    body.light-mode .profile-form-card, body.light-mode .risk-result,
+    body.light-mode .question-card, body.light-mode .history-item,
+    body.light-mode .offline-search-box, body.light-mode .recent-searches {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(8px);
+      border-color: rgba(0,0,0,0.1);
+      color: #0f172a;
+    }
+    body.light-mode .dashboard-card h4, body.light-mode .feature-card h3,
+    body.light-mode .auth-title, body.light-mode .consult-header h2 {
+      color: #0f172a;
+    }
+    body.light-mode .input-group input, body.light-mode .risk-textarea,
+    body.light-mode .form-group input, body.light-mode .form-group textarea,
+    body.light-mode .form-group select {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: #cbd5e1;
+    }
+    body.light-mode .message-area.success-msg {
+      background: rgba(34,197,94,0.2);
+      color: #166534;
+    }
+    body.light-mode .message-area.error-msg {
+      background: rgba(220,38,38,0.2);
+      color: #991b1b;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Brand Header */
+    .brand {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .brand h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #FFFFFF 0%, #A5F0FF 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+    }
+    .brand h1 i {
+      background: none;
+      color: #3b82f6;
+      font-size: 2.4rem;
+    }
+    .sub-badge {
+      display: inline-block;
+      background: rgba(59,130,246,0.2);
+      backdrop-filter: blur(4px);
+      border-radius: 40px;
+      padding: 0.3rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-top: 0.5rem;
+      border: 1px solid rgba(59,130,246,0.5);
+    }
+    .tagline {
+      margin-top: 1rem;
+    }
+    .tagline h2 {
+      font-size: 2rem;
+      font-weight: 600;
+      background: linear-gradient(to right, #f0f9ff, #b9d9ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .legal-desc {
+      font-size: 1rem;
+      color: #cbd5e6;
+      max-width: 650px;
+      margin: 0.5rem auto 0;
+    }
+    .highlight {
+      color: #60a5fa;
+      font-weight: 500;
+    }
+
+    /* 4 static intro boxes (logged out) */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin: 3rem 0 2.2rem;
+      transition: 0.2s;
+    }
+    .feature-card {
+      background: rgba(18, 25, 45, 0.7);
+      backdrop-filter: blur(8px);
+      border-radius: 28px;
+      padding: 1.6rem 1.2rem;
+      text-align: center;
+      border: 1px solid rgba(72, 120, 255, 0.25);
+      transition: all 0.2s ease;
+      cursor: default;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(96, 165, 250, 0.6);
+    }
+    .feature-icon {
+      font-size: 2.6rem;
+      color: #60a5fa;
+      margin-bottom: 1rem;
+    }
+    .feature-card h3 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: white;
+    }
+    .feature-card p {
+      font-size: 0.85rem;
+      color: #b9c7dd;
+    }
+
+    /* Auth Section (Sign In / Create Account) */
+    .auth-section {
+      background: rgba(12, 18, 34, 0.75);
+      backdrop-filter: blur(16px);
+      border-radius: 2rem;
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      padding: 1.8rem 2rem;
+      margin-top: 1rem;
+      transition: all 0.2s;
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
+    }
+    .auth-title {
+      font-size: 1.7rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toggle-buttons {
+      display: flex;
+      gap: 1rem;
+      margin: 1.2rem 0 1.8rem;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      padding-bottom: 0.5rem;
+    }
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      color: #b9c7dd;
+      transition: 0.2s;
+      border-radius: 40px;
+    }
+    .toggle-btn.active {
+      color: white;
+      background: #1e2a47;
+    }
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .input-group label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #cbd5f0;
+    }
+    .input-group input {
+      background: #0f1424;
+      border: 1px solid #2d3a60;
+      border-radius: 18px;
+      padding: 0.9rem 1.2rem;
+      font-size: 0.95rem;
+      color: #f0f4ff;
+      font-family: inherit;
+      outline: none;
+    }
+    .input-group input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+    }
+    .btn-primary {
+      background: linear-gradient(105deg, #2563eb, #1e40af);
+      border: none;
+      padding: 0.9rem;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(105deg, #3b82f6, #2563eb);
+      transform: scale(0.98);
+    }
+    .demo-note {
+      font-size: 0.75rem;
+      text-align: center;
+      margin-top: 1rem;
+      background: rgba(0,0,0,0.3);
+      padding: 0.5rem;
+      border-radius: 28px;
+      color: #9bb1da;
+    }
+    .message-area {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      padding: 0.5rem;
+      border-radius: 28px;
+      text-align: center;
+    }
+    .error-msg { background: rgba(220,38,38,0.2); color: #fca5a5; }
+    .success-msg { background: rgba(34,197,94,0.2); color: #86efac; }
+    .hidden { display: none; }
+
+    /* Dashboard Layout */
+    .dashboard-container {
+      background: rgba(12, 18, 34, 0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 2rem;
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .dashboard-inner {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .dashboard-sidebar {
+      width: 260px;
+      background: rgba(5, 10, 22, 0.6);
+      backdrop-filter: blur(4px);
+      padding: 1.8rem 1rem;
+      border-right: 1px solid rgba(96, 165, 250, 0.2);
+      flex-shrink: 0;
+    }
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .sidebar-menu li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.7rem 1rem;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #ccddf8;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .sidebar-menu li i { width: 24px; font-size: 1.2rem; }
+    .sidebar-menu li:hover {
+      background: rgba(59,130,246,0.2);
+      color: white;
+      transform: translateX(4px);
+    }
+    .logout-sidebar {
+      margin-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 1rem;
+    }
+    .logout-sidebar li { color: #f87171; }
+    .logout-sidebar li i { color: #f87171; }
+    .light-mode-item i { color: #facc15 !important; }
+    .dashboard-main {
+      flex: 1;
+      padding: 1.8rem 2rem;
+      min-height: 500px;
+    }
+
+    /* Home view styles */
+    .search-area { margin-bottom: 1.8rem; }
+    .search-bar {
+      background: rgba(15,23,42,0.8);
+      border-radius: 60px;
+      padding: 0.6rem 1.2rem;
+      display: flex;
+      gap: 12px;
+      border: 1px solid #2d3a60;
+    }
+    .search-bar i { color: #60a5fa; }
+    .search-bar input {
+      background: transparent;
+      border: none;
+      flex: 1;
+      color: white;
+      font-size: 1rem;
+      outline: none;
+    }
+    .chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 2rem;
+    }
+    .chip {
+      background: rgba(30,41,75,0.7);
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid rgba(96,165,250,0.3);
+    }
+    .chip:hover { background: #2563eb; transform: scale(0.96); }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0 1.5rem;
+    }
+    .dashboard-card {
+      background: rgba(18,25,45,0.7);
+      backdrop-filter: blur(8px);
+      border-radius: 28px;
+      padding: 1.4rem 1.2rem;
+      border: 1px solid rgba(96,165,250,0.25);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .dashboard-card:hover {
+      transform: translateY(-4px);
+      background: rgba(30,45,75,0.8);
+    }
+    .card-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+    .dashboard-card h4 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.4rem; color: white; }
+    .dashboard-card p { font-size: 0.85rem; color: #b9c7dd; }
+    .safety-note {
+      background: rgba(0,0,0,0.35);
+      border-radius: 20px;
+      padding: 0.8rem 1.2rem;
+      font-size: 0.75rem;
+      margin-top: 1.5rem;
+      border-left: 3px solid #f97316;
+    }
+    .footer-note {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: #6c7a9e;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 1.2rem;
+    }
+
+    /* ========= AI CONSULT PAGE STYLES ========= */
+    .consult-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .consult-header h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(to right, #fff, #a5f0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .online-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.4);
+      padding: 0.4rem 1rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+    }
+    .green-dot {
+      width: 10px;
+      height: 10px;
+      background-color: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 4px #22c55e;
+    }
+    .consult-sub {
+      color: #9ca3af;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      border-left: 3px solid #60a5fa;
+      padding-left: 0.8rem;
+    }
+    .category-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 2rem;
+    }
+    .cat-pill {
+      background: rgba(30, 41, 75, 0.8);
+      backdrop-filter: blur(4px);
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+      border: 1px solid rgba(96,165,250,0.4);
+    }
+    .cat-pill:hover {
+      background: #2563eb;
+      transform: scale(0.96);
+    }
+    .chat-container {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      max-height: 450px;
+      overflow-y: auto;
+    }
+    .message {
+      margin-bottom: 1.2rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .bot-message {
+      background: rgba(30, 41, 75, 0.6);
+      border-radius: 1.2rem;
+      padding: 1rem 1.2rem;
+      max-width: 90%;
+      align-self: flex-start;
+      border-left: 3px solid #3b82f6;
+    }
+    .user-message {
+      background: rgba(59,130,246,0.2);
+      border-radius: 1.2rem;
+      padding: 0.8rem 1.2rem;
+      max-width: 80%;
+      align-self: flex-end;
+      border-right: 3px solid #60a5fa;
+    }
+    .legal-reasoning {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-top: 1rem;
+      border: 1px solid #2d3a60;
+    }
+    .legal-reasoning h4 {
+      color: #facc15;
+      margin-bottom: 0.8rem;
+      font-size: 1rem;
+    }
+    .reason-row {
+      display: flex;
+      margin-bottom: 0.5rem;
+      gap: 10px;
+    }
+    .reason-label {
+      font-weight: 600;
+      min-width: 120px;
+      color: #94a3b8;
+    }
+    .reason-value {
+      color: #e2e8f0;
+    }
+    .input-area {
+      display: flex;
+      gap: 12px;
+      margin-top: 1rem;
+    }
+    .input-area input {
+      flex: 1;
+      background: #0f1424;
+      border: 1px solid #2d3a60;
+      border-radius: 40px;
+      padding: 0.9rem 1.2rem;
+      color: white;
+      font-family: inherit;
+      outline: none;
+    }
+    .input-area button {
+      background: #2563eb;
+      border: none;
+      border-radius: 40px;
+      padding: 0 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      transition: 0.2s;
+    }
+    .input-area button:hover {
+      background: #3b82f6;
+    }
+
+    /* ========= LEARNER MODE STYLES ========= */
+    .learner-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .learner-header h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(to right, #fff, #a5f0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .learner-sub {
+      color: #9ca3af;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      border-left: 3px solid #60a5fa;
+      padding-left: 0.8rem;
+    }
+    .learner-layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .learner-categories {
+      flex: 0 0 260px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 1.5rem;
+      padding: 1rem;
+      backdrop-filter: blur(4px);
+    }
+    .category-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.8rem 1rem;
+      border-radius: 40px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: 0.2s;
+      color: #cbd5e6;
+      font-weight: 500;
+    }
+    .category-item i {
+      width: 28px;
+      font-size: 1.2rem;
+    }
+    .category-item:hover {
+      background: rgba(59,130,246,0.2);
+      color: white;
+    }
+    .category-item.active {
+      background: #2563eb;
+      color: white;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+    }
+    .learner-detail {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      backdrop-filter: blur(4px);
+    }
+    .detail-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .detail-desc {
+      color: #94a3b8;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .info-card {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 1rem;
+      padding: 1rem;
+    }
+    .info-card h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      color: #facc15;
+    }
+    .info-card p {
+      font-size: 0.9rem;
+      color: #e2e8f0;
+      white-space: pre-line;
+    }
+    .practical-steps {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    .practical-steps h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      color: #60a5fa;
+    }
+    .practical-steps ul {
+      padding-left: 1.5rem;
+      color: #cbd5e6;
+      font-size: 0.85rem;
+    }
+    .practical-steps li {
+      margin-bottom: 0.4rem;
+    }
+
+    /* ========= HELPLINES PAGE STYLES ========= */
+    .helplines-header { margin-bottom: 1.5rem; }
+    .helplines-header h2 { font-size: 1.8rem; font-weight: 600; background: linear-gradient(to right, #fff, #a5f0ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .helplines-sub { color: #9ca3af; font-size: 0.9rem; margin-top: 0.25rem; }
+    .danger-card { background: rgba(220,38,38,0.15); border: 1px solid #ef4444; border-radius: 1.2rem; padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    .danger-text h3 { font-size: 1.2rem; color: #fca5a5; }
+    .emergency-btn { background: #dc2626; border: none; padding: 0.7rem 1.5rem; border-radius: 60px; font-weight: bold; color: white; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
+    .helplines-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
+    .helpline-card { background: rgba(15,23,42,0.6); backdrop-filter: blur(8px); border-radius: 1.2rem; padding: 1rem 1.2rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(96,165,250,0.2); }
+    .call-btn { background: #22c55e; border: none; padding: 0.5rem 1rem; border-radius: 40px; font-weight: 600; font-size: 0.8rem; cursor: pointer; color: white; }
+    .guidance-row { display: flex; flex-wrap: wrap; gap: 1.5rem; margin: 2rem 0; }
+    .guidance-card { flex: 1; background: rgba(0,0,0,0.3); border-radius: 1.2rem; padding: 1.2rem; }
+    .guidance-card h4 { color: #60a5fa; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px; }
+    .guidance-card ul, .guidance-card p { font-size: 0.85rem; color: #cbd5e6; padding-left: 1.2rem; }
+    .map-area { background: rgba(0,0,0,0.35); border-radius: 1.2rem; padding: 1rem; margin-top: 1rem; }
+    .map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; flex-wrap: wrap; }
+    .hide-map-btn { background: none; border: 1px solid #64748b; padding: 0.3rem 0.8rem; border-radius: 40px; font-size: 0.7rem; cursor: pointer; color: #cbd5e6; }
+    #realMap { height: 260px; width: 100%; border-radius: 1rem; margin-bottom: 0.8rem; background: #1e293b; z-index: 1; }
+    .map-places { background: #0f1424; border-radius: 1rem; padding: 0.8rem; font-size: 0.8rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem; }
+    .voice-buttons { display: flex; gap: 1rem; margin: 1rem 0 0.5rem; }
+    .voice-btn { background: rgba(96,165,250,0.2); border: 1px solid #60a5fa; padding: 0.5rem 1rem; border-radius: 40px; font-size: 0.8rem; cursor: pointer; }
+
+    /* ========= FIR DRAFT STYLES ========= */
+    .fir-container { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+    .fir-sidebar { flex: 0 0 260px; background: rgba(0,0,0,0.25); border-radius: 1.5rem; padding: 1.2rem; }
+    .fir-sidebar h3 { font-size: 1.2rem; margin-bottom: 1rem; color: #60a5fa; display: flex; align-items: center; gap: 8px; }
+    .drafts-list { list-style: none; margin-top: 0.8rem; }
+    .drafts-list li { background: rgba(15,23,42,0.6); padding: 0.6rem 0.8rem; border-radius: 40px; margin-bottom: 0.5rem; cursor: pointer; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
+    .drafts-list li:hover { background: #2563eb; }
+    .draft-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+    .delete-draft { color: #f87171; font-size: 0.7rem; cursor: pointer; padding: 0 4px; }
+    .fir-form { flex: 1; background: rgba(0,0,0,0.25); border-radius: 1.5rem; padding: 1.5rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .form-group label { font-size: 0.75rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input, .form-group textarea, .form-group select { background: #0f1424; border: 1px solid #2d3a60; border-radius: 20px; padding: 0.7rem 1rem; color: white; font-family: inherit; font-size: 0.9rem; resize: vertical; }
+    .form-group textarea { min-height: 80px; }
+    .full-width { grid-column: span 2; }
+    .action-buttons { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1.5rem 0 1rem; }
+    .btn-secondary { background: rgba(100,116,139,0.3); border: 1px solid #64748b; padding: 0.6rem 1.2rem; border-radius: 40px; font-weight: 500; cursor: pointer; color: white; }
+    .btn-secondary:hover { background: #475569; }
+    .preview-area { margin-top: 1.5rem; background: rgba(0,0,0,0.3); border-radius: 1rem; padding: 1rem; border-left: 3px solid #3b82f6; }
+    .preview-area h4 { margin-bottom: 0.5rem; color: #facc15; }
+    .fir-preview { font-family: monospace; white-space: pre-wrap; font-size: 0.85rem; background: #0a0f1e; padding: 1rem; border-radius: 0.8rem; color: #cbd5e6; }
+
+    /* ========= OFFLINE MODE STYLES ========= */
+    .offline-header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .offline-badge {
+      display: inline-block;
+      background: #22c55e20;
+      border: 1px solid #22c55e;
+      color: #22c55e;
+      border-radius: 40px;
+      padding: 0.3rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .offline-header h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(to right, #fff, #a5f0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .offline-sub {
+      color: #9ca3af;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .offline-search-box {
+      background: rgba(15,23,42,0.8);
+      border-radius: 60px;
+      padding: 0.6rem 1.2rem;
+      display: flex;
+      gap: 12px;
+      border: 1px solid #2d3a60;
+      margin-bottom: 2rem;
+    }
+    .offline-search-box i { color: #60a5fa; }
+    .offline-search-box input {
+      background: transparent;
+      border: none;
+      flex: 1;
+      color: white;
+      font-size: 1rem;
+      outline: none;
+    }
+    .recent-searches {
+      background: rgba(0,0,0,0.25);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 2rem;
+    }
+    .recent-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+      color: #94a3b8;
+      font-size: 0.85rem;
+    }
+    .recent-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .recent-tag {
+      background: #1e293b;
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .recent-tag:hover { background: #2563eb; }
+    .search-result {
+      background: rgba(0,0,0,0.25);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      border-left: 3px solid #60a5fa;
+    }
+    .result-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .result-law {
+      color: #facc15;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .result-desc {
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      color: #cbd5e6;
+    }
+    .result-penalty {
+      background: rgba(0,0,0,0.3);
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .faq-section {
+      background: rgba(0,0,0,0.25);
+      border-radius: 1rem;
+      padding: 1rem;
+    }
+    .faq-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+    }
+    .faq-item {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 0.8rem 0;
+      cursor: pointer;
+    }
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 500;
+    }
+    .faq-answer {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      display: none;
+    }
+    .faq-answer.show {
+      display: block;
+    }
+
+    /* ========= RISK DETECTION STYLES ========= */
+    .risk-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .risk-header h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(to right, #fff, #a5f0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .risk-sub {
+      color: #9ca3af;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .risk-textarea {
+      width: 100%;
+      background: #0f1424;
+      border: 1px solid #2d3a60;
+      border-radius: 1.2rem;
+      padding: 1rem;
+      color: white;
+      font-family: inherit;
+      font-size: 0.95rem;
+      resize: vertical;
+      margin-bottom: 1.5rem;
+    }
+    .risk-textarea:focus {
+      border-color: #3b82f6;
+      outline: none;
+    }
+    .analyze-btn {
+      background: linear-gradient(105deg, #2563eb, #1e40af);
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-bottom: 2rem;
+    }
+    .analyze-btn:hover {
+      transform: scale(0.98);
+      background: #3b82f6;
+    }
+    .risk-result {
+      background: rgba(0,0,0,0.3);
+      border-radius: 1.2rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-left: 4px solid;
+    }
+    .risk-level {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+    }
+    .risk-level.low { color: #22c55e; border-left-color: #22c55e; }
+    .risk-level.medium { color: #facc15; border-left-color: #facc15; }
+    .risk-level.high { color: #ef4444; border-left-color: #ef4444; }
+    .risk-actions {
+      margin-top: 1rem;
+    }
+    .risk-actions h4 {
+      color: #60a5fa;
+      margin-bottom: 0.5rem;
+    }
+    .risk-actions ul {
+      padding-left: 1.5rem;
+      color: #cbd5e6;
+      font-size: 0.9rem;
+    }
+    .risk-actions li {
+      margin-bottom: 0.4rem;
+    }
+    .risk-emergency {
+      margin-top: 1rem;
+      background: rgba(0,0,0,0.2);
+      border-radius: 0.8rem;
+      padding: 0.8rem;
+    }
+    .risk-emergency p {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .risk-examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 1.5rem;
+    }
+    .risk-example-chip {
+      background: rgba(30,41,75,0.7);
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .risk-example-chip:hover {
+      background: #2563eb;
+    }
+
+    /* ========= QUIZ STYLES ========= */
+    .quiz-header { margin-bottom: 1.5rem; }
+    .quiz-header h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(to right, #fff, #a5f0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .quiz-sub { color: #9ca3af; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .topic-selector {
+      background: rgba(0,0,0,0.25);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .topic-selector label { font-weight: 600; color: #60a5fa; }
+    .topic-selector select {
+      background: #0f1424;
+      border: 1px solid #2d3a60;
+      border-radius: 40px;
+      padding: 0.5rem 1rem;
+      color: white;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .quiz-progress {
+      background: rgba(0,0,0,0.25);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .progress-score {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #facc15;
+    }
+    .questions-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .question-card {
+      background: rgba(0,0,0,0.3);
+      border-radius: 1.2rem;
+      padding: 1.5rem;
+    }
+    .question-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
+    .options { display: flex; flex-direction: column; gap: 0.8rem; }
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(15,23,42,0.6);
+      border-radius: 60px;
+      padding: 0.6rem 1.2rem;
+      cursor: pointer;
+      transition: 0.2s;
+      border: 1px solid transparent;
+    }
+    .option:hover { background: #1e293b; border-color: #3b82f6; }
+    .option.selected { background: #2563eb; border-color: #60a5fa; }
+    .option.correct-mark { background: #22c55e20; border-color: #22c55e; }
+    .option.wrong-mark { background: #ef444420; border-color: #ef4444; }
+    .option-letter { font-weight: 700; width: 28px; }
+    .option-text { flex: 1; }
+    .option-status { width: 24px; text-align: center; }
+    .quiz-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 1rem; }
+    .quiz-btn {
+      background: #2563eb;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      color: white;
+      transition: 0.2s;
+    }
+    .quiz-btn:hover { background: #3b82f6; }
+    .result-card {
+      background: rgba(0,0,0,0.3);
+      border-radius: 1.2rem;
+      padding: 1.5rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .result-score { font-size: 2rem; font-weight: 700; color: #facc15; margin-bottom: 1rem; }
+    .result-feedback { margin-top: 1rem; font-size: 0.9rem; color: #94a3b8; }
+
+    /* ========= HISTORY PAGE STYLES ========= */
+    .history-header {
+      margin-bottom: 1.5rem;
+    }
+    .history-header h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(to right, #fff, #a5f0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .history-stats {
+      background: rgba(0,0,0,0.25);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .clear-history-btn {
+      background: #ef4444;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      color: white;
+      transition: 0.2s;
+    }
+    .clear-history-btn:hover {
+      background: #dc2626;
+    }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .history-item {
+      background: rgba(0,0,0,0.3);
+      border-radius: 1rem;
+      padding: 1rem;
+      border-left: 3px solid #60a5fa;
+    }
+    .history-item-risk {
+      border-left-color: #f97316;
+    }
+    .history-item-ai {
+      border-left-color: #3b82f6;
+    }
+    .history-item-user {
+      border-left-color: #a855f7;
+    }
+    .history-title {
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .history-time {
+      font-size: 0.7rem;
+      color: #94a3b8;
+    }
+    .history-content {
+      font-size: 0.85rem;
+      color: #cbd5e6;
+      white-space: pre-wrap;
+    }
+
+    /* ========= SETTINGS PAGE STYLES ========= */
+    .settings-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .settings-profile {
+      background: rgba(0,0,0,0.3);
+      border-radius: 1.2rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .profile-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .profile-avatar {
+      width: 50px;
+      height: 50px;
+      background: #2563eb;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .profile-details h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .profile-details p {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .settings-signout {
+      background: #ef4444;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      color: white;
+      transition: 0.2s;
+    }
+    .settings-signout:hover {
+      background: #dc2626;
+    }
+    .settings-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .settings-item {
+      background: rgba(0,0,0,0.25);
+      border-radius: 1rem;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .settings-item:hover {
+      background: rgba(59,130,246,0.2);
+      transform: translateX(4px);
+    }
+    .settings-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(59,130,246,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #60a5fa;
+    }
+    .settings-text {
+      flex: 1;
+    }
+    .settings-text h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+    .settings-text p {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+    .settings-arrow {
+      color: #64748b;
+    }
+    /* Back button for sub-settings */
+    .settings-back-btn {
+      background: none;
+      border: none;
+      color: #60a5fa;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-bottom: 1.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+    .settings-back-btn:hover {
+      color: #3b82f6;
+    }
+
+    /* ========= PROFILE SETTINGS FORM STYLES ========= */
+    .profile-form-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .profile-form-card {
+      background: rgba(0,0,0,0.3);
+      border-radius: 1.2rem;
+      padding: 1.5rem;
+    }
+    .profile-form-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #60a5fa;
+    }
+    .profile-form-group {
+      margin-bottom: 1.2rem;
+    }
+    .profile-form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.3rem;
+    }
+    .profile-form-group input, .profile-form-group select {
+      width: 100%;
+      background: #0f1424;
+      border: 1px solid #2d3a60;
+      border-radius: 40px;
+      padding: 0.8rem 1rem;
+      color: white;
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .profile-form-group input:focus, .profile-form-group select:focus {
+      border-color: #3b82f6;
+    }
+    .profile-form-group input:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .profile-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .profile-save-btn {
+      background: #22c55e;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      color: white;
+      transition: 0.2s;
+    }
+    .profile-save-btn:hover {
+      background: #16a34a;
+    }
+    .profile-cancel-btn {
+      background: #64748b;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      color: white;
+      transition: 0.2s;
+    }
+    .profile-cancel-btn:hover {
+      background: #475569;
+    }
+
+    /* Setting specific cards */
+    .setting-card {
+      background: rgba(0,0,0,0.2);
+      border-radius: 1.2rem;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+    .setting-label {
+      font-weight: 500;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #475569;
+      transition: 0.3s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #3b82f6;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    .pin-input {
+      background: #0f1424;
+      border: 1px solid #2d3a60;
+      border-radius: 40px;
+      padding: 0.5rem 1rem;
+      color: white;
+      width: 120px;
+      text-align: center;
+    }
+    .danger-btn {
+      background: #ef4444;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      color: white;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-sidebar {
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        display: flex;
+        flex-direction: row;
+        padding: 0.8rem;
+      }
+      .sidebar-menu {
+        flex-direction: row;
+      }
+      .dashboard-main {
+        padding: 1rem;
+      }
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <!-- E-Legal Advisor Backend API Bridge -->
+  <script src="api.js"></script>
+  <script src="emergency-search.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="brand">
+    <h1><i class="fas fa-gavel"></i> E-Legal Advisor</h1>
+    <div class="sub-badge">Pakistan AI Legal Assistant</div>
+    <div class="tagline">
+      <h2>Know Your Legal Rights</h2>
+      <p class="legal-desc">AI-powered legal guidance based on Pakistani law.<br> <span class="highlight">Free, accessible, and confidential.</span></p>
+    </div>
+  </div>
+
+  <div id="introBoxes" class="features-grid">
+    <div class="feature-card"><div class="feature-icon"><i class="fas fa-robot"></i></div><h3>AI Legal Consult</h3><p>Instant AI-driven advice on Pakistani legal matters, 24/7.</p></div>
+    <div class="feature-card"><div class="feature-icon"><i class="fas fa-file-alt"></i></div><h3>FIR Draft Generator</h3><p>Generate structured FIR drafts based on incident details.</p></div>
+    <div class="feature-card"><div class="feature-icon"><i class="fas fa-shield-alt"></i></div><h3>Risk Detection</h3><p>Identify legal vulnerabilities & proactive risk assessment.</p></div>
+    <div class="feature-card"><div class="feature-icon"><i class="fas fa-phone-alt"></i></div><h3>Emergency Helplines</h3><p>Direct access to legal aid & emergency contacts across Pakistan.</p></div>
+  </div>
+
+  <div id="authContainer" class="auth-section"></div>
+  <div class="footer-note"><i class="fas fa-balance-scale"></i> E-Legal Advisor v5.0 - Pakistan AI Legal Assistant 🇵🇰</div>
+</div>
+
+<script>
+  // ---------- AUTH LOGIC (unchanged) ----------
+  const STORAGE_USERS_KEY = "legal_users_v1";
+  const CURRENT_USER_KEY = "legal_current_user";
+  const ACCOUNT_TYPE_KEY = "user_account_type";
+  const THEME_KEY = "app_theme";
+  const APP_LOCK_KEY = "app_lock_pin";
+  const APP_LOCK_ENABLED_KEY = "app_lock_enabled";
+  const HISTORY_RETENTION_KEY = "history_retention_days";
+  
+  function loadUsers() { const stored = localStorage.getItem(STORAGE_USERS_KEY); if (stored) return JSON.parse(stored); const defaultUsers = [{ fullName: "Demo User", email: "demo@example.com", password: "demo123" }]; localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(defaultUsers)); return defaultUsers; }
+  function saveUsers(users) { localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users)); }
+  function getCurrentUser() { const curr = localStorage.getItem(CURRENT_USER_KEY); return curr ? JSON.parse(curr) : null; }
+  function setCurrentUser(user) { if (user) localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user)); else localStorage.removeItem(CURRENT_USER_KEY); }
+  function findUserByEmail(users, email) { return users.find(u => u.email.toLowerCase() === email.toLowerCase()); }
+  function registerUser(fullName, email, password, confirmPassword) {
+    if (!fullName || fullName.trim() === "") return { success: false, message: "Full name required" };
+    if (!email || !email.match(/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/)) return { success: false, message: "Valid email required" };
+    if (!password || password.length < 4) return { success: false, message: "Password min 4 chars" };
+    if (password !== confirmPassword) return { success: false, message: "Passwords do not match" };
+    const users = loadUsers(); if (findUserByEmail(users, email)) return { success: false, message: "Email exists" };
+    const newUser = { fullName: fullName.trim(), email: email.trim().toLowerCase(), password };
+    users.push(newUser); saveUsers(users);
+    return { success: true, message: "Account created! You are now signed in.", user: newUser };
+  }
+  function signInUser(email, password) {
+    if (!email || !password) return { success: false, message: "Email and password required" };
+    const users = loadUsers(); const user = findUserByEmail(users, email);
+    if (!user) return { success: false, message: "No account found" };
+    if (user.password !== password) return { success: false, message: "Incorrect password" };
+    return { success: true, message: `Welcome ${user.fullName}!`, user: { fullName: user.fullName, email: user.email } };
+  }
+  
+  function getUserAccountType() {
+    const stored = localStorage.getItem(ACCOUNT_TYPE_KEY);
+    return stored ? stored : "Citizen";
+  }
+  function setUserAccountType(type) {
+    localStorage.setItem(ACCOUNT_TYPE_KEY, type);
+  }
+
+  // Theme handling
+  function initTheme() {
+    const savedTheme = localStorage.getItem(THEME_KEY);
+    if (savedTheme === 'light') {
+      document.body.classList.add('light-mode');
+    } else {
+      document.body.classList.remove('light-mode');
+    }
+  }
+  function toggleTheme(isLight) {
+    if (isLight) {
+      document.body.classList.add('light-mode');
+      localStorage.setItem(THEME_KEY, 'light');
+    } else {
+      document.body.classList.remove('light-mode');
+      localStorage.setItem(THEME_KEY, 'dark');
+    }
+  }
+
+  let activeFormType = "signin";
+  const authContainer = document.getElementById("authContainer");
+  const introBoxesDiv = document.getElementById("introBoxes");
+  let msgTimeout;
+  function showMessage(text, type, containerId = "dynamicMessage") {
+    const msgDiv = document.getElementById(containerId);
+    if (msgDiv) { msgDiv.innerText = text; msgDiv.className = `message-area ${type === "error" ? "error-msg" : "success-msg"}`; if (msgTimeout) clearTimeout(msgTimeout); msgTimeout = setTimeout(() => { if (msgDiv) msgDiv.innerText = ""; }, 3500); }
+  }
+
+  function refreshSidebarUserInfo() {
+    const user = getCurrentUser();
+    if (!user) return;
+    const displayName = user.fullName;
+    const sidebarAvatarDiv = document.querySelector(".dashboard-sidebar .profile-avatar");
+    const sidebarNameSpan = document.querySelector(".dashboard-sidebar .profile-details h3");
+    const sidebarEmailSpan = document.querySelector(".dashboard-sidebar .profile-details p");
+    if (sidebarAvatarDiv) sidebarAvatarDiv.textContent = displayName.charAt(0).toUpperCase();
+    if (sidebarNameSpan) sidebarNameSpan.textContent = displayName;
+    if (sidebarEmailSpan) sidebarEmailSpan.textContent = user.email;
+  }
+
+  // ======================= PROFILE SETTINGS PAGE =======================
+  function renderProfileSettings() {
+    const user = getCurrentUser();
+    const displayName = user ? user.fullName : "Demo User";
+    const userEmail = user ? user.email : "demo@example.com";
+    const accountType = getUserAccountType();
+    return `
+      <div class="profile-form-container">
+        <button class="settings-back-btn" id="backToSettingsBtn"><i class="fas fa-arrow-left"></i> Back to Settings</button>
+        <div class="profile-form-card">
+          <div class="profile-form-title"><i class="fas fa-user-edit"></i> Profile Settings</div>
+          <div class="profile-form-group">
+            <label>DISPLAY NAME</label>
+            <input type="text" id="profileDisplayName" value="${displayName.replace(/"/g, '&quot;')}">
+          </div>
+          <div class="profile-form-group">
+            <label>EMAIL</label>
+            <input type="email" id="profileEmail" value="${userEmail}" disabled>
+          </div>
+          <div class="profile-form-group">
+            <label>ACCOUNT TYPE</label>
+            <select id="profileAccountType">
+              <option value="Citizen" ${accountType === "Citizen" ? "selected" : ""}>Citizen</option>
+              <option value="Lawyer" ${accountType === "Lawyer" ? "selected" : ""}>Lawyer</option>
+              <option value="Student" ${accountType === "Student" ? "selected" : ""}>Student</option>
+              <option value="Other" ${accountType === "Other" ? "selected" : ""}>Other</option>
+            </select>
+          </div>
+          <div class="profile-buttons">
+            <button id="profileSaveBtn" class="profile-save-btn"><i class="fas fa-save"></i> Save Profile</button>
+            <button id="profileCancelBtn" class="profile-cancel-btn"><i class="fas fa-times"></i> Cancel</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function attachProfileSettingsEvents() {
+    const saveBtn = document.getElementById("profileSaveBtn");
+    const cancelBtn = document.getElementById("profileCancelBtn");
+    const backBtn = document.getElementById("backToSettingsBtn");
+    const displayNameInput = document.getElementById("profileDisplayName");
+    const accountTypeSelect = document.getElementById("profileAccountType");
+    if (backBtn) backBtn.addEventListener("click", () => switchView('settings'));
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => {
+        const newDisplayName = displayNameInput.value.trim();
+        if (!newDisplayName) {
+          showMessage("Display name cannot be empty", "error", "profileMsg");
+          return;
+        }
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+          const users = loadUsers();
+          const userIndex = users.findIndex(u => u.email === currentUser.email);
+          if (userIndex !== -1) {
+            users[userIndex].fullName = newDisplayName;
+            saveUsers(users);
+          }
+          currentUser.fullName = newDisplayName;
+          setCurrentUser(currentUser);
+          const newAccountType = accountTypeSelect.value;
+          setUserAccountType(newAccountType);
+          showMessage("Profile updated successfully", "success", "profileMsg");
+          refreshSidebarUserInfo();
+          setTimeout(() => switchView('settings'), 1000);
+        }
+      });
+    }
+    if (cancelBtn) cancelBtn.addEventListener("click", () => switchView('settings'));
+    const mainDiv = document.querySelector(".dashboard-main");
+    if (mainDiv && !document.getElementById("profileMsg")) {
+      const msgDiv = document.createElement("div");
+      msgDiv.id = "profileMsg";
+      msgDiv.className = "message-area";
+      msgDiv.style.marginTop = "1rem";
+      mainDiv.appendChild(msgDiv);
+    }
+  }
+
+  // ======================= SETTINGS SUBPAGES =======================
+  function renderLanguageSettings() {
+    const currentTheme = localStorage.getItem(THEME_KEY) === 'light';
+    return `
+      <button class="settings-back-btn" id="backToSettingsBtnLang"><i class="fas fa-arrow-left"></i> Back to Settings</button>
+      <div class="setting-card">
+        <h3 style="margin-bottom: 1rem;"><i class="fas fa-globe"></i> Language & Theme</h3>
+        <div class="setting-row">
+          <span class="setting-label">APP LANGUAGE</span>
+          <select id="appLanguageSelect" style="background:#0f1424; border-radius:40px; padding:0.4rem 1rem; color:white;">
+            <option value="en" selected>English</option>
+            <option value="ur">Urdu (coming soon)</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Dark Mode</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="darkModeToggle" ${currentTheme ? 'checked' : ''}>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="help-text" style="font-size:0.75rem; color:#94a3b8; margin-top:0.5rem;">Switch between light and dark theme</p>
+      </div>
+    `;
+  }
+
+  function attachLanguageSettingsEvents() {
+    const backBtn = document.getElementById("backToSettingsBtnLang");
+    if (backBtn) backBtn.addEventListener("click", () => switchView('settings'));
+    const darkToggle = document.getElementById("darkModeToggle");
+    if (darkToggle) {
+      darkToggle.addEventListener("change", (e) => {
+        toggleTheme(e.target.checked);
+      });
+    }
+    const langSelect = document.getElementById("appLanguageSelect");
+    if (langSelect) {
+      langSelect.addEventListener("change", (e) => {
+        if (e.target.value === 'ur') {
+          showMessage("Urdu language support coming soon.", "success", "langMsg");
+          langSelect.value = 'en';
+        } else {
+          showMessage("Language set to English.", "success", "langMsg");
+        }
+      });
+    }
+    const mainDiv = document.querySelector(".dashboard-main");
+    if (mainDiv && !document.getElementById("langMsg")) {
+      const msgDiv = document.createElement("div");
+      msgDiv.id = "langMsg";
+      msgDiv.className = "message-area";
+      mainDiv.appendChild(msgDiv);
+    }
+  }
+
+  function renderEmergencySettings() {
+    const savedEmergency = localStorage.getItem("emergency_contact") || "+92 300 0000000";
+    return `
+      <button class="settings-back-btn" id="backToSettingsBtnEmerg"><i class="fas fa-arrow-left"></i> Back to Settings</button>
+      <div class="setting-card">
+        <h3 style="margin-bottom: 1rem;"><i class="fas fa-exclamation-triangle"></i> Emergency & SOS</h3>
+        <div class="setting-row">
+          <span class="setting-label">EMERGENCY CONTACT NUMBER</span>
+          <input type="tel" id="emergencyContactInput" value="${savedEmergency}" style="background:#0f1424; border:1px solid #2d3a60; border-radius:40px; padding:0.4rem 1rem; color:white; width:140px;">
+        </div>
+        <div class="setting-row">
+          <button id="testSosBtn" class="danger-btn" style="background:#f97316;"><i class="fas fa-exclamation-circle"></i> ⚠️ Test SOS Alert</button>
+        </div>
+        <p style="font-size:0.75rem; color:#94a3b8; margin-top:0.5rem;">In a real emergency, always call 15 (Police) or 1122 (Rescue).</p>
+      </div>
+    `;
+  }
+
+  function attachEmergencySettingsEvents() {
+    const backBtn = document.getElementById("backToSettingsBtnEmerg");
+    if (backBtn) backBtn.addEventListener("click", () => switchView('settings'));
+    const sosBtn = document.getElementById("testSosBtn");
+    if (sosBtn) {
+      sosBtn.addEventListener("click", () => {
+        showMessage("⚠️ TEST SOS ALERT: This is a simulation. In real emergency call 15 or 1122.", "error", "emergMsg");
+      });
+    }
+    const contactInput = document.getElementById("emergencyContactInput");
+    if (contactInput) {
+      contactInput.addEventListener("change", () => {
+        localStorage.setItem("emergency_contact", contactInput.value);
+        showMessage("Emergency contact saved.", "success", "emergMsg");
+      });
+    }
+    const mainDiv = document.querySelector(".dashboard-main");
+    if (mainDiv && !document.getElementById("emergMsg")) {
+      const msgDiv = document.createElement("div");
+      msgDiv.id = "emergMsg";
+      msgDiv.className = "message-area";
+      mainDiv.appendChild(msgDiv);
+    }
+  }
+
+  function renderPrivacySettings() {
+    const hasPin = localStorage.getItem(APP_LOCK_KEY) !== null;
+    const isEnabled = localStorage.getItem(APP_LOCK_ENABLED_KEY) === 'true';
+    const retentionDays = localStorage.getItem(HISTORY_RETENTION_KEY) || "30";
+    return `
+      <button class="settings-back-btn" id="backToSettingsBtnPrivacy"><i class="fas fa-arrow-left"></i> Back to Settings</button>
+      <div class="setting-card">
+        <h3 style="margin-bottom: 1rem;"><i class="fas fa-lock"></i> Privacy & Security</h3>
+        <div class="setting-row">
+          <span class="setting-label">Set App Lock PIN</span>
+          <div><input type="password" id="pinInput" class="pin-input" placeholder="4-digit PIN" maxlength="4"> <button id="savePinBtn" class="btn-secondary" style="padding:0.3rem 0.8rem;">Save</button></div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Fingerprint Authentication</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="fingerprintToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">HISTORY RETENTION</span>
+          <select id="historyRetentionSelect" style="background:#0f1424; border-radius:40px; padding:0.4rem 1rem; color:white;">
+            <option value="7" ${retentionDays === "7" ? "selected" : ""}>7 days</option>
+            <option value="30" ${retentionDays === "30" ? "selected" : ""}>30 days</option>
+            <option value="90" ${retentionDays === "90" ? "selected" : ""}>90 days</option>
+            <option value="0" ${retentionDays === "0" ? "selected" : ""}>Forever</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <button id="clearAllDataBtn" class="danger-btn">Clear All Data</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function attachPrivacySettingsEvents() {
+    const backBtn = document.getElementById("backToSettingsBtnPrivacy");
+    if (backBtn) backBtn.addEventListener("click", () => switchView('settings'));
+    const savePinBtn = document.getElementById("savePinBtn");
+    const pinInput = document.getElementById("pinInput");
+    if (savePinBtn) {
+      savePinBtn.addEventListener("click", () => {
+        const pin = pinInput.value.trim();
+        if (pin.length === 4 && /^\d+$/.test(pin)) {
+          localStorage.setItem(APP_LOCK_KEY, btoa(pin));
+          localStorage.setItem(APP_LOCK_ENABLED_KEY, 'true');
+          showMessage("PIN saved. App lock enabled.", "success", "privacyMsg");
+        } else {
+          showMessage("Please enter a 4-digit numeric PIN.", "error", "privacyMsg");
+        }
+      });
+    }
+    const fingerprintToggle = document.getElementById("fingerprintToggle");
+    if (fingerprintToggle) {
+      fingerprintToggle.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          if (window.PublicKeyCredential) {
+            showMessage("Fingerprint authentication demo. Would use WebAuthn in production.", "success", "privacyMsg");
+          } else {
+            showMessage("Fingerprint not supported on this device.", "error", "privacyMsg");
+            fingerprintToggle.checked = false;
+          }
+        } else {
+          showMessage("Fingerprint auth disabled.", "success", "privacyMsg");
+        }
+      });
+    }
+    const retentionSelect = document.getElementById("historyRetentionSelect");
+    if (retentionSelect) {
+      retentionSelect.addEventListener("change", (e) => {
+        localStorage.setItem(HISTORY_RETENTION_KEY, e.target.value);
+        pruneHistoryByRetention();
+        showMessage("History retention updated. Old entries cleared.", "success", "privacyMsg");
+      });
+    }
+    const clearBtn = document.getElementById("clearAllDataBtn");
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        if (confirm("WARNING: This will clear all app data (history, drafts, settings). User accounts will remain. Continue?")) {
+          localStorage.removeItem(HISTORY_STORAGE_KEY);
+          localStorage.removeItem(FIR_DRAFTS_KEY);
+          localStorage.removeItem(OFFLINE_RECENT_KEY);
+          localStorage.removeItem(THEME_KEY);
+          localStorage.removeItem(APP_LOCK_KEY);
+          localStorage.removeItem(APP_LOCK_ENABLED_KEY);
+          localStorage.removeItem(HISTORY_RETENTION_KEY);
+          localStorage.removeItem("emergency_contact");
+          showMessage("All data cleared. Reloading...", "success", "privacyMsg");
+          setTimeout(() => window.location.reload(), 1500);
+        }
+      });
+    }
+    const mainDiv = document.querySelector(".dashboard-main");
+    if (mainDiv && !document.getElementById("privacyMsg")) {
+      const msgDiv = document.createElement("div");
+      msgDiv.id = "privacyMsg";
+      msgDiv.className = "message-area";
+      mainDiv.appendChild(msgDiv);
+    }
+  }
+
+  function pruneHistoryByRetention() {
+    const days = parseInt(localStorage.getItem(HISTORY_RETENTION_KEY) || "30");
+    if (days === 0) return;
+    const now = new Date();
+    const history = getHistory();
+    const filtered = history.filter(entry => {
+      const entryDate = new Date(entry.timestamp);
+      const diffDays = (now - entryDate) / (1000 * 60 * 60 * 24);
+      return diffDays <= days;
+    });
+    if (filtered.length !== history.length) saveHistory(filtered);
+  }
+
+  // *****************************
+  // RISK DETECTION MODULE (with history)
+  // *****************************
+  const HISTORY_STORAGE_KEY = "app_history";
+  function getHistory() { const stored = localStorage.getItem(HISTORY_STORAGE_KEY); return stored ? JSON.parse(stored) : []; }
+  function saveHistory(history) { localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history)); }
+  function addHistoryEntry(type, title, content, timestamp = new Date().toLocaleString()) { const history = getHistory(); history.unshift({ type, title, content, timestamp }); saveHistory(history); pruneHistoryByRetention(); }
+  function clearHistory() { localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify([])); }
+  function getCurrentTimestamp() { return new Date().toLocaleString(); }
+
+  function analyzeRisk(situation) {
+    const text = situation.toLowerCase();
+    let risk = "Low";
+    let actions = [];
+    let contacts = [];
+    if (text.includes("threat") || text.includes("kill") || text.includes("harm") || text.includes("violence") || text.includes("abuse") || text.includes("domestic")) {
+      risk = "High";
+      actions = ["Call 15 (Police) immediately if you feel in danger.", "Document all threats with screenshots, messages, or recordings.", "File a complaint at the nearest police station.", "Contact Women Helpline (1043) for support.", "If cyber threat, report to FIA Cyber Wing (1991)."];
+      contacts = ["Police: 15 / 1122", "Women Helpline: 1043", "FIA Cyber Wing: 1991"];
+    } else if (text.includes("harass") || text.includes("workplace") || text.includes("employer") || text.includes("colleague") || text.includes("cyber") || text.includes("bully")) {
+      risk = "Medium";
+      actions = ["Document all incidents with dates, times, and evidence.", "Report to HR or supervisor if workplace-related.", "Contact Women Helpline (1043) or FIA Cyber Wing (1991).", "Consider filing a complaint at police station.", "Save copies of messages/emails as proof."];
+      contacts = ["Women Helpline: 1043", "FIA Cyber Wing: 1991", "Legal Aid: 042-99211300"];
+    } else if (text.includes("rent") || text.includes("landlord") || text.includes("dispute") || text.includes("property")) {
+      risk = "Low";
+      actions = ["Review your rental agreement and collect evidence.", "Send a formal legal notice to the landlord.", "Approach Rent Controller / court for dispute resolution.", "Seek free legal advice from Legal Aid (042-99211300)."];
+      contacts = ["Legal Aid: 042-99211300", "District Court Rent Controller"];
+    } else {
+      risk = "Low";
+      actions = ["If you feel unsafe, contact local police (15).", "Gather any relevant documents or evidence.", "Consult a lawyer or legal aid center for advice.", "Keep emergency numbers handy."];
+      contacts = ["Police: 15 / 1122", "Legal Aid: 042-99211300"];
+    }
+    return { risk, actions, contacts };
+  }
+  function renderRiskDetection() {
+    return `<div class="risk-header"><h2><i class="fas fa-shield-alt"></i> Advanced Risk Detection</h2><div class="risk-sub">Describe your situation in detail. The AI will analyze risk level and provide immediate safety steps.</div></div><textarea id="riskSituation" class="risk-textarea" rows="5" placeholder='Example: "Someone is threatening to harm me and my family" or "My colleague is harassing me at work and refusing to stop"...'></textarea><div style="text-align:center;"><button id="analyzeRiskBtn" class="analyze-btn"><i class="fas fa-chart-line"></i> Analyze Risk</button></div><div id="riskResultContainer"></div><div class="risk-examples"><span class="risk-example-chip" data-example="Someone threatened to kill me">Someone threatened to kill me</span><span class="risk-example-chip" data-example="My employer is harassing me at work">My employer is harassing me at work</span><span class="risk-example-chip" data-example="I have a rent dispute with landlord">I have a rent dispute with landlord</span><span class="risk-example-chip" data-example="Someone is blackmailing me online">Someone is blackmailing me online</span></div>`;
+  }
+  function attachRiskEvents() {
+    const analyzeBtn = document.getElementById("analyzeRiskBtn");
+    const textarea = document.getElementById("riskSituation");
+    const resultContainer = document.getElementById("riskResultContainer");
+    const exampleChips = document.querySelectorAll(".risk-example-chip");
+    function performAnalysis() {
+      const situation = textarea.value.trim();
+      if (!situation) { showMessage("Please describe your situation first.", "error", "riskMsg"); return; }
+      const analysis = analyzeRisk(situation);
+      let riskClass = analysis.risk === "Low" ? "low" : (analysis.risk === "Medium" ? "medium" : "high");
+      let actionsHtml = analysis.actions.map(a => `<li>${a}</li>`).join('');
+      let contactsHtml = analysis.contacts.map(c => `<p>📞 ${c}</p>`).join('');
+      resultContainer.innerHTML = `<div class="risk-result"><div class="risk-level ${riskClass}"><i class="fas fa-exclamation-triangle"></i> ${analysis.risk.toUpperCase()} RISK</div><div class="risk-actions"><h4>RECOMMENDED ACTIONS</h4><ul>${actionsHtml}</ul></div><div class="risk-emergency"><h4>EMERGENCY CONTACTS</h4>${contactsHtml}</div></div>`;
+      addHistoryEntry('risk', `Risk Analysis: ${analysis.risk.toUpperCase()} — "${situation.substring(0, 100)}"`, `Risk: ${analysis.risk}\nActions: ${analysis.actions.join(', ')}\nContacts: ${analysis.contacts.join(', ')}`, getCurrentTimestamp());
+    }
+    if (analyzeBtn) analyzeBtn.addEventListener("click", performAnalysis);
+    exampleChips.forEach(chip => { chip.addEventListener("click", () => { const example = chip.getAttribute("data-example"); if (textarea) textarea.value = example; performAnalysis(); }); });
+    const mainDiv = document.querySelector(".dashboard-main");
+    if (mainDiv && !document.getElementById("riskMsg")) { const msgDiv = document.createElement("div"); msgDiv.id = "riskMsg"; msgDiv.className = "message-area"; msgDiv.style.marginTop = "1rem"; mainDiv.appendChild(msgDiv); }
+  }
+
+  // *****************************
+  // AI CONSULT (with history)
+  // *****************************
+  function getLegalResponse(query) {
+    const q = query.toLowerCase();
+    if (q.includes("cyber") || q.includes("harassment")) {
+      return { laws: "Prevention of Electronic Crimes Act 2016 (PECA) – Section 20 (cyber harassment).\nPunishment: imprisonment up to 3 years or fine.", steps: "1. Preserve screenshots/URLs.\n2. Report to FIA Cyber Crime Wing.\n3. File complaint at police station.\n4. Contact helpline 1043.", situation: "Cyber Harassment", applicable: "PECA 2016, Section 20", action: "File complaint with FIA & local police" };
+    } else if (q.includes("landlord") || q.includes("rent")) {
+      return { laws: "Punjab Rented Premises Act 2009 / Sindh Rented Premises Ordinance 1979.\nTenant rights & eviction procedures.", steps: "1. Review rental agreement.\n2. Send legal notice.\n3. Approach Rent Controller.\n4. Seek legal aid.", situation: "Landlord Issue", applicable: "Rented Premises Act", action: "File petition in Rent Controller Court" };
+    } else if (q.includes("workplace") || q.includes("employment")) {
+      return { laws: "Industrial Relations Act 2012, Punjab Employees Social Security Ordinance 1965.", steps: "1. Document harassment/discrimination.\n2. Report to HR.\n3. File complaint with Ombudsman.\n4. Contact labour court.", situation: "Workplace Dispute", applicable: "Industrial Relations Act", action: "File complaint with labour department" };
+    } else if (q.includes("domestic") || q.includes("violence") || q.includes("abuse")) {
+      return { laws: "Domestic Violence (Prevention and Protection) Act 2021.\nProtection orders, residence rights, counseling.", steps: "1. Call 1043 (helpline).\n2. Record evidence (photos, medical).\n3. File FIR at police station.\n4. Seek protection order from court.", situation: "Domestic Violence", applicable: "Domestic Violence Act 2021", action: "File FIR / Contact helpline 1043" };
+    } else if (q.includes("fraud") || q.includes("scam")) {
+      return { laws: "Pakistan Penal Code sections 420, 468 (cheating & forgery).", steps: "1. Save payment receipts & chat logs.\n2. Report to FIA Cyber Crime.\n3. File FIR.\n4. Contact bank.", situation: "Fraud / Scam", applicable: "PPC Section 420", action: "Register FIR and FIA complaint" };
+    } else if (q.includes("blackmail")) {
+      return { laws: "PECA Section 20 & 21, PPC Section 383 (extortion).", steps: "1. Do not pay.\n2. Capture evidence.\n3. Report to FIA.\n4. Block the person.", situation: "Blackmail", applicable: "PECA & PPC", action: "Complain to FIA Cyber Wing" };
+    } else {
+      return { laws: "Based on Pakistani legal principles, consult a lawyer for specific advice.", steps: "1. Gather documents.\n2. Consult a legal aid center.\n3. Visit nearest police station.\n4. Call 180 (Police).", situation: query.substring(0, 40), applicable: "General legal framework", action: "Seek professional legal counsel" };
+    }
+  }
+  function generateBotReply(userText) {
+    const resp = getLegalResponse(userText);
+    return `<div class="bot-message"><strong><i class="fas fa-gavel"></i> Legal Advisor:</strong><div style="margin-top:8px;"><strong>📜 Relevant Laws Found:</strong><br>${resp.laws}</div><div style="margin-top:8px;"><strong>✅ Recommended Steps:</strong><br>${resp.steps.replace(/\n/g, '<br>')}</div><div class="legal-reasoning" style="margin-top:12px;"><h4><i class="fas fa-brain"></i> Legal Reasoning Flow</h4><div class="reason-row"><span class="reason-label">SITUATION:</span><span class="reason-value">${resp.situation}</span></div><div class="reason-row"><span class="reason-label">APPLICABLE LAWS:</span><span class="reason-value">${resp.applicable}</span></div><div class="reason-row"><span class="reason-label">SUGGESTED ACTION:</span><span class="reason-value">${resp.action}</span></div></div></div>`;
+  }
+  function renderAIConsult() {
+    return `<div class="consult-header"><h2><i class="fas fa-comments"></i> AI Legal Consultation</h2><div class="online-status"><span class="green-dot"></span> Online · 24/7</div></div><div class="consult-sub">Powered by Pakistan law database • Real-time guidance</div><div class="category-pills" id="consultCategories"><span class="cat-pill" data-topic="Cyber Harassment">Cyber Harassment</span><span class="cat-pill" data-topic="Landlord Issue">Landlord Issue</span><span class="cat-pill" data-topic="Workplace">Workplace</span><span class="cat-pill" data-topic="Domestic Violence">Domestic Violence</span><span class="cat-pill" data-topic="Fraud / Scam">Fraud / Scam</span><span class="cat-pill" data-topic="Blackmail">Blackmail</span></div><div class="chat-container" id="chatContainer"><div class="message"><div class="bot-message"><i class="fas fa-robot"></i> Assalam-o-Alaikum — I am your E-Legal Advisor. Please describe your legal issue and I will provide relevant information based on Pakistani law.</div></div></div><div class="input-area"><input type="text" id="consultInput" placeholder="Describe your legal situation..."><button id="sendConsultBtn"><i class="fas fa-paper-plane"></i> Send</button></div>`;
+  }
+  function attachConsultEvents() {
+    const input = document.getElementById("consultInput");
+    const sendBtn = document.getElementById("sendConsultBtn");
+    const chatContainer = document.getElementById("chatContainer");
+    const categoryPills = document.querySelectorAll(".cat-pill");
+    function addUserMessage(text) { const msgDiv = document.createElement("div"); msgDiv.className = "message user-message"; msgDiv.innerHTML = `<strong>You:</strong> ${text}`; chatContainer.appendChild(msgDiv); chatContainer.scrollTop = chatContainer.scrollHeight; }
+    function addBotReply(text) { const msgDiv = document.createElement("div"); msgDiv.className = "message"; msgDiv.innerHTML = generateBotReply(text); chatContainer.appendChild(msgDiv); chatContainer.scrollTop = chatContainer.scrollHeight; }
+    function handleQuery(query) { if (!query.trim()) return; const timestamp = getCurrentTimestamp(); addUserMessage(query); addBotReply(query); addHistoryEntry('user', `You asked: "${query.substring(0, 100)}"`, query, timestamp); const resp = getLegalResponse(query); const botSummary = `${resp.laws}\n${resp.steps}`; addHistoryEntry('ai', `AI Advisor response`, botSummary, timestamp); if (input) input.value = ""; }
+    if (sendBtn) sendBtn.onclick = () => { if (input) handleQuery(input.value); };
+    if (input) input.addEventListener("keypress", (e) => { if (e.key === "Enter") handleQuery(input.value); });
+    categoryPills.forEach(pill => { pill.addEventListener("click", () => { const topic = pill.getAttribute("data-topic"); handleQuery(topic); }); });
+  }
+
+  // *****************************
+  // LEARNER MODE (unchanged)
+  // *****************************
+  const lawTopics = [
+    { id: "const", name: "Constitutional Rights", icon: "fas fa-balance-scale", color: "#3b82f6", desc: "Fundamental rights under Constitution of Pakistan 1973.", keySections: "Art 8 – Right to life & liberty\nArt 19 – Freedom of speech", penalties: "Challenged in High Court", steps: ["Document all evidence (photos, messages, witnesses)", "File a complaint at the nearest police station", "Consult a free legal aid lawyer if needed", "Contact the relevant helpline for immediate support"] },
+    { id: "criminal", name: "Criminal Law (PPC)", icon: "fas fa-gavel", color: "#ef4444", desc: "Pakistan Penal Code 1860 – defines crimes and punishments.", keySections: "Sec 302 – Murder\nSec 337 – Hurt", penalties: "Imprisonment up to death penalty", steps: ["Record FIR at police station", "Collect medical/forensic evidence", "Hire criminal lawyer", "Follow court proceedings"] },
+    { id: "cyber", name: "Cyber Crime (PECA)", icon: "fas fa-laptop-code", color: "#8b5cf6", desc: "Prevention of Electronic Crimes Act 2016.", keySections: "Sec 20 – Cyber harassment\nSec 21 – Spreading hatred", penalties: "Fine or imprisonment up to 3 years", steps: ["Preserve digital evidence (screenshots)", "Report to FIA Cyber Crime Wing", "File complaint at police station", "Contact helpline 1043"] },
+    { id: "family", name: "Family Law", icon: "fas fa-female", color: "#ec489a", desc: "Muslim Family Laws Ordinance 1961, Child Marriage Restraint Act.", keySections: "Sec 7 – Talaq (divorce)\nSec 4 – Polygamy restriction", penalties: "Fine, imprisonment for violation", steps: ["Document marriage and communication", "Consult family lawyer", "File suit in family court", "Seek mediation if applicable"] },
+    { id: "property", name: "Property Law", icon: "fas fa-home", color: "#10b981", desc: "Transfer of Property Act 1882, Registration Act.", keySections: "Sec 54 – Sale deed\nSec 122 – Gift", penalties: "Cancellation of transfer, fines", steps: ["Verify ownership documents", "Get stamp duty paid", "Register at sub-registrar", "Consult property lawyer"] },
+    { id: "labor", name: "Labor Law", icon: "fas fa-briefcase", color: "#f97316", desc: "Industrial Relations Act 2012, Factories Act.", keySections: "Sec 25 – Unfair termination\nSec 37 – Worker safety", penalties: "Reinstatement, compensation", steps: ["Document employment contract", "Report to labour department", "File grievance with court", "Contact labour union"] },
+    { id: "consumer", name: "Consumer Protection", icon: "fas fa-shopping-cart", color: "#06b6d4", desc: "Consumer Protection Act 2018.", keySections: "Sec 9 – Defective goods\nSec 12 – Unfair trade practices", penalties: "Compensation, replacement", steps: ["Keep receipts and warranties", "Send legal notice to seller", "File complaint at consumer court", "Seek refund or damages"] },
+    { id: "anticorruption", name: "Anti-Corruption", icon: "fas fa-handcuffs", color: "#a855f7", desc: "National Accountability Ordinance 1999, Prevention of Corruption Act.", keySections: "Sec 9 – Corruption offences\nSec 10 – Assets beyond means", penalties: "Imprisonment up to 14 years, fine", steps: ["Collect evidence of corruption", "File complaint with NAB", "Provide witness statements", "Follow NAB inquiry"] }
+  ];
+  function getDetailHtml(topic) {
+    return `<div class="detail-title"><i class="${topic.icon}" style="color: ${topic.color}"></i> ${topic.name}</div><div class="detail-desc">${topic.desc}</div><div class="info-grid"><div class="info-card"><h4><i class="fas fa-key"></i> KEY SECTIONS</h4><p>${topic.keySections.replace(/\n/g, '<br>')}</p></div><div class="info-card"><h4><i class="fas fa-exclamation-triangle"></i> PENALTIES</h4><p>${topic.penalties}</p></div></div><div class="practical-steps"><h4><i class="fas fa-clipboard-list"></i> PRACTICAL STEPS</h4><ul>${topic.steps.map(step => `<li>${step}</li>`).join('')}</ul></div>`;
+  }
+  function renderLearnerMode() {
+    let cats = `<div class="learner-categories">`;
+    lawTopics.forEach(topic => { cats += `<div class="category-item" data-topic-id="${topic.id}"><i class="${topic.icon}" style="color: ${topic.color}"></i> ${topic.name}</div>`; });
+    cats += `</div><div class="learner-detail" id="learnerDetail">${getDetailHtml(lawTopics[0])}</div>`;
+    return `<div class="learner-header"><h2><i class="fas fa-graduation-cap"></i> Learner Mode</h2><div class="online-status"><span class="green-dot"></span> Pakistani Law Database</div></div><div class="learner-sub">Understand Pakistani law — explained simply, with real examples, penalties, and practical steps.</div><div class="learner-layout">${cats}</div>`;
+  }
+  function attachLearnerEvents() {
+    const categories = document.querySelectorAll('.category-item');
+    const detailContainer = document.getElementById('learnerDetail');
+    if (!detailContainer) return;
+    categories.forEach(cat => {
+      cat.addEventListener('click', () => {
+        const topicId = cat.getAttribute('data-topic-id');
+        const topic = lawTopics.find(t => t.id === topicId);
+        if (topic) { categories.forEach(c => c.classList.remove('active')); cat.classList.add('active'); detailContainer.innerHTML = getDetailHtml(topic); }
+      });
+    });
+    if (categories.length) categories[0].classList.add('active');
+  }
+
+  // *****************************
+  // HELPLINES (with real Leaflet map - unchanged)
+  // *****************************
+  function renderHelplines() {
+    return `<div class="helplines-header"><h2><i class="fas fa-phone-alt" style="color:#ef4444"></i> Emergency Helplines</h2><div class="helplines-sub">Pakistan emergency contacts — available 24/7.</div></div><div class="danger-card"><div class="danger-text"><h3><i class="fas fa-exclamation-triangle"></i> Immediate Danger?</h3><p style="font-size:0.8rem">Call Police immediately or press the emergency button.</p></div><button class="emergency-btn" id="emergencyCallBtn">Call 15</button></div><div class="helplines-grid"><div class="helpline-card"><div><h4>Police</h4><p>Emergency & Rescue</p><p><strong>15 / 1122</strong></p></div><button class="call-btn" data-number="tel:15">Call Now</button></div><div class="helpline-card"><div><h4>Cybercrime</h4><p>FIA Cyber Wing</p><p><strong>1991</strong></p></div><button class="call-btn" data-number="tel:1991">Call Now</button></div><div class="helpline-card"><div><h4>Women Protection</h4><p>Women Helpline</p><p><strong>1043</strong></p></div><button class="call-btn" data-number="tel:1043">Call Now</button></div><div class="helpline-card"><div><h4>Legal Aid</h4><p>Free Legal Advice</p><p><strong>042-99211300</strong></p></div><button class="call-btn" data-number="tel:04299211300">Call Now</button></div><div class="helpline-card"><div><h4>Ambulance</h4><p>Medical Emergency</p><p><strong>1122</strong></p></div><button class="call-btn" data-number="tel:1122">Call Now</button></div><div class="helpline-card"><div><h4>Child Protection</h4><p>Child Helpline</p><p><strong>1121</strong></p></div><button class="call-btn" data-number="tel:1121">Call Now</button></div></div><div class="guidance-row"><div class="guidance-card"><h4><i class="fas fa-gavel"></i> Quick Legal Guidance Before Calling</h4><h5 style="margin:0.5rem 0 0.3rem">FIR Steps</h5><ul><li>Visit nearest police station</li><li>Submit written complaint</li><li>Obtain FIR copy (free)</li></ul><h5 style="margin:0.5rem 0 0.3rem">Required Documents</h5><ul><li>CNIC / ID Card</li><li>Evidence (screenshots/photos)</li><li>Witness contact details</li></ul><h5 style="margin:0.5rem 0 0.3rem">Your Rights</h5><ul><li>Right to free legal aid</li><li>Right to file complaint</li><li>Right to FIR copy</li></ul></div><div class="guidance-card"><h4><i class="fas fa-map-marker-alt"></i> Nearby Police & Hospitals</h4><div class="map-area"><div class="map-header"><span>📍 Interactive Map - Islamabad</span><button id="hideMapBtn" class="hide-map-btn">Hide Map</button></div><div id="realMap" style="height:260px; width:100%; border-radius:1rem; margin-bottom:0.8rem;"></div><div id="mapPlaces" class="map-places"><div class="map-place-item"><i class="fas fa-utensils"></i> McDonald's</div><div class="map-place-item"><i class="fas fa-store"></i> Xander's Islamabad</div><div class="map-place-item"><i class="fas fa-museum"></i> Lok Virsa Heritage Museum</div><div class="map-place-item"><i class="fas fa-hospital"></i> KRL Hospital</div><div class="map-place-item"><i class="fas fa-building"></i> Excise & Taxation Department</div><div class="map-place-item"><i class="fas fa-hospital"></i> Shifa International Hospitals Limited</div></div><div style="font-size:0.7rem; margin-top:0.5rem; color:#6b7280;"><i class="fas fa-info-circle"></i> Map data © OpenStreetMap contributors</div></div><div class="voice-buttons"><button id="voiceEnglish" class="voice-btn"><i class="fas fa-microphone-alt"></i> Read in English</button><button id="voiceUrdu" class="voice-btn"><i class="fas fa-language"></i> اردو میں سنیں</button></div></div></div>`;
+  }
+  function initRealMap() {
+    const mapContainer = document.getElementById("realMap");
+    if (!mapContainer) return;
+    const map = L.map('realMap').setView([33.6844, 73.0479], 14);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; CartoDB', subdomains: 'abcd', maxZoom: 19, minZoom: 10 }).addTo(map);
+    const places = [[33.710,73.065,"McDonald's"],[33.698,73.048,"Xander's Islamabad"],[33.676,73.071,"Lok Virsa Heritage Museum"],[33.662,73.038,"KRL Hospital"],[33.690,73.055,"Excise & Taxation Department"],[33.704,73.042,"Shifa International Hospitals Limited"]];
+    places.forEach(p => { L.marker([p[0],p[1]]).addTo(map).bindPopup(`<b>${p[2]}</b>`); });
+    L.marker([33.693,73.062]).addTo(map).bindPopup("<b>Police Station Secretariat</b>");
+  }
+  function attachHelplinesEvents() {
+    document.getElementById("emergencyCallBtn")?.addEventListener("click", () => { window.location.href = "tel:15"; showMessage("Redirecting to emergency call...", "success", "helplineMsg"); });
+    document.querySelectorAll(".call-btn").forEach(btn => { btn.addEventListener("click", (e) => { const num = btn.getAttribute("data-number"); if(num) window.location.href = num; else showMessage("Call feature simulated", "success", "helplineMsg"); }); });
+    const hideBtn = document.getElementById("hideMapBtn");
+    const mapDiv = document.getElementById("realMap");
+    if (hideBtn && mapDiv) { hideBtn.addEventListener("click", () => { if (mapDiv.style.display === "none") { mapDiv.style.display = "block"; hideBtn.innerText = "Hide Map"; } else { mapDiv.style.display = "none"; hideBtn.innerText = "Show Map"; } }); }
+    document.getElementById("voiceEnglish")?.addEventListener("click", () => { showMessage("🔊 Voice assistance (English): Quick Legal Guidance – FIR steps, required documents, your rights. (Demo)", "success", "helplineMsg"); });
+    document.getElementById("voiceUrdu")?.addEventListener("click", () => { showMessage("🔊 آواز کی مدد: فوری قانونی رہنمائی - ایف آئی آر کے اقدامات، مطلوبہ دستاویزات، آپ کے حقوق (تجرباتی)", "success", "helplineMsg"); });
+    const mainDiv = document.querySelector(".dashboard-main");
+    if (mainDiv && !document.getElementById("helplineMsg")) { const msgDiv = document.createElement("div"); msgDiv.id = "helplineMsg"; msgDiv.className = "message-area"; msgDiv.style.marginTop = "1rem"; mainDiv.appendChild(msgDiv); }
+    setTimeout(() => { initRealMap(); }, 100);
+  }
+
+  // *****************************
+  // FIR DRAFT GENERATOR (unchanged)
+  // *****************************
+  const FIR_DRAFTS_KEY = "fir_drafts";
+  function getDrafts() { const stored = localStorage.getItem(FIR_DRAFTS_KEY); return stored ? JSON.parse(stored) : []; }
+  function saveDraft(draft) { let drafts = getDrafts(); drafts.push({ id: Date.now(), ...draft }); localStorage.setItem(FIR_DRAFTS_KEY, JSON.stringify(drafts)); return drafts; }
+  function deleteDraftById(id) { let drafts = getDrafts(); drafts = drafts.filter(d => d.id != id); localStorage.setItem(FIR_DRAFTS_KEY, JSON.stringify(drafts)); updateDraftsList(); showMessage("Draft deleted", "success", "firMessage"); }
+  function loadDraftToForm(draft) { document.getElementById("docType").value = draft.documentType || "FIR Application"; document.getElementById("fullName").value = draft.fullName || ""; document.getElementById("dateTime").value = draft.dateTime || ""; document.getElementById("location").value = draft.location || ""; document.getElementById("nature").value = draft.nature || ""; document.getElementById("incident").value = draft.incident || ""; document.getElementById("accused").value = draft.accused || ""; document.getElementById("witnesses").value = draft.witnesses || ""; document.getElementById("evidence").value = draft.evidence || ""; showMessage("Draft loaded", "success", "firMessage"); }
+  function getFormData() { return { documentType: document.getElementById("docType").value, fullName: document.getElementById("fullName").value, dateTime: document.getElementById("dateTime").value, location: document.getElementById("location").value, nature: document.getElementById("nature").value, incident: document.getElementById("incident").value, accused: document.getElementById("accused").value, witnesses: document.getElementById("witnesses").value, evidence: document.getElementById("evidence").value }; }
+  function generateFIRPreview(data) { return `DOCUMENT: ${data.documentType || "FIR Application"}\nComplainant: ${data.fullName || "[Your Name]"}\nDate & Time: ${data.dateTime || new Date().toLocaleString()}\nLocation: ${data.location || "[Location]"}\nNature of Complaint: ${data.nature || "FIR Application"}\n\nSTATEMENT OF FACTS:\n${data.incident || "[Describe the incident in detail]"}\n\nACCUSED PERSON(S):\n${data.accused || "Unknown"}\n\nWITNESSES:\n${data.witnesses || "None"}\n\nEVIDENCE:\n${data.evidence || "None"}\n\nI declare that the above information is true and correct to the best of my knowledge.`; }
+  function updateDraftsList() { const drafts = getDrafts(); const listEl = document.getElementById("draftsList"); if (!listEl) return; listEl.innerHTML = ""; if (drafts.length === 0) { listEl.innerHTML = '<li style="background:none; justify-content:center;">No drafts saved</li>'; return; }
+    drafts.forEach(d => { const li = document.createElement("li"); li.innerHTML = `<span class="draft-title">${d.documentType || "FIR"} - ${d.fullName?.slice(0,12) || "draft"}</span><span class="delete-draft" data-id="${d.id}">🗑️</span>`; li.querySelector(".delete-draft")?.addEventListener("click", (e) => { e.stopPropagation(); deleteDraftById(d.id); }); li.addEventListener("click", () => loadDraftToForm(d)); listEl.appendChild(li); });
+  }
+  function renderFIRDraft() {
+    return `<div style="margin-bottom:1rem;"><h2 style="font-size:1.8rem; font-weight:600;"><i class="fas fa-file-alt" style="color:#6366f1"></i> FIR Draft Generator</h2><p style="color:#9ca3af;">Generate professional legal documents in seconds.</p></div><div class="fir-container"><div class="fir-sidebar"><h3><i class="fas fa-folder-open"></i> My Drafts (<span id="draftCount">0</span>)</h3><ul class="drafts-list" id="draftsList"><li style="background:none;">Loading...</li></ul></div><div class="fir-form"><div class="form-row"><div class="form-group"><label>DOCUMENT TYPE</label><select id="docType"><option>FIR Application</option><option>Complaint Letter</option></select></div><div class="form-group"><label>FULL NAME</label><input type="text" id="fullName" placeholder="Your full name"></div></div><div class="form-row"><div class="form-group"><label>DATE & TIME</label><input type="datetime-local" id="dateTime"></div><div class="form-group"><label>LOCATION / ADDRESS</label><input type="text" id="location" placeholder="Incident location"></div></div><div class="form-row"><div class="form-group full-width"><label>NATURE OF COMPLAINT</label><input type="text" id="nature" placeholder="e.g., Theft, Harassment"></div></div><div class="form-group full-width"><label>INCIDENT DETAILS / NARRATIVE</label><textarea id="incident" rows="3" placeholder="Describe what happened in detail..."></textarea></div><div class="form-row"><div class="form-group"><label>ACCUSED PERSON(S)</label><input type="text" id="accused" placeholder="Name, relation, description"></div><div class="form-group"><label>WITNESSES</label><input type="text" id="witnesses" placeholder="Names and contact info"></div></div><div class="form-group full-width"><label>EVIDENCE</label><input type="text" id="evidence" placeholder="Photos, videos, screenshots"></div><div class="action-buttons"><button id="generateBtn" class="btn-primary"><i class="fas fa-magic"></i> Generate Draft</button><button id="saveDraftBtn" class="btn-secondary"><i class="fas fa-save"></i> Save Draft</button><button id="printBtn" class="btn-secondary"><i class="fas fa-print"></i> Print / PDF</button></div><div id="previewArea" class="preview-area hidden"><h4><i class="fas fa-file-contract"></i> DOCUMENT PREVIEW</h4><pre id="previewContent" class="fir-preview"></pre></div><div id="firMessage" class="message-area"></div></div></div>`;
+  }
+  function attachFIREvents() {
+    updateDraftsList();
+    const draftCountSpan = document.getElementById("draftCount"); if(draftCountSpan) draftCountSpan.innerText = getDrafts().length;
+    const generateBtn = document.getElementById("generateBtn");
+    const saveBtn = document.getElementById("saveDraftBtn");
+    const printBtn = document.getElementById("printBtn");
+    const previewArea = document.getElementById("previewArea");
+    const previewContent = document.getElementById("previewContent");
+    function updatePreview() { const data = getFormData(); const previewText = generateFIRPreview(data); previewContent.innerText = previewText; previewArea.classList.remove("hidden"); }
+    generateBtn?.addEventListener("click", () => { updatePreview(); showMessage("Draft generated", "success", "firMessage"); });
+    saveBtn?.addEventListener("click", () => { const data = getFormData(); if(!data.fullName || !data.nature) { showMessage("Please fill at least Full Name and Nature of Complaint", "error", "firMessage"); return; } saveDraft(data); updateDraftsList(); if(draftCountSpan) draftCountSpan.innerText = getDrafts().length; showMessage("Draft saved successfully", "success", "firMessage"); });
+    printBtn?.addEventListener("click", () => { if(previewArea.classList.contains("hidden")) updatePreview(); const printWindow = window.open('', '_blank'); printWindow.document.write('<html><head><title>FIR Draft</title><style>body{font-family:monospace; padding:2rem;}</style></head><body><pre>' + previewContent.innerText + '</pre></body></html>'); printWindow.document.close(); printWindow.print(); });
+  }
+
+  // *****************************
+  // OFFLINE MODULE (unchanged)
+  // *****************************
+  const OFFLINE_RECENT_KEY = "offline_recent_searches";
+  const legalDatabase = [
+    { keywords: ["theft", "steal"], title: "Theft", law: "378-382 PPC", desc: "Punishment for theft.", penalty: "Imprisonment up to 3 years or fine." },
+    { keywords: ["bail", "zamana"], title: "Bail", law: "CrPC Sections 496-502", desc: "Bail procedure.", penalty: "Court decides." },
+    { keywords: ["harassment"], title: "Harassment", law: "PECA 2016", desc: "Cyber harassment.", penalty: "Imprisonment up to 3 years." },
+    { keywords: ["fir"], title: "FIR", law: "CrPC Section 154", desc: "First Information Report.", penalty: "Mandatory registration." },
+    { keywords: ["domestic violence"], title: "Domestic Violence", law: "DV Act 2021", desc: "Protection against abuse.", penalty: "Imprisonment up to 1 year." },
+    { keywords: ["cybercrime"], title: "Cyber Crime", law: "PECA 2016", desc: "Cyber offenses.", penalty: "Fine and imprisonment." },
+    { keywords: ["murder"], title: "Murder", law: "PPC Section 302", desc: "Intentional killing.", penalty: "Death or life imprisonment." },
+    { keywords: ["fraud"], title: "Fraud", law: "PPC Section 420", desc: "Cheating.", penalty: "Imprisonment up to 7 years." }
+  ];
+  function getOfflineSearchResult(query) { const q = query.toLowerCase(); const match = legalDatabase.find(item => item.keywords.some(kw => q.includes(kw))); if (match) return match; return { title: "No specific result", law: "General legal principle", desc: "Please consult a lawyer.", penalty: "Varies" }; }
+  function saveRecentSearch(term) { let recents = JSON.parse(localStorage.getItem(OFFLINE_RECENT_KEY) || "[]"); recents = [term, ...recents.filter(t => t !== term)].slice(0, 5); localStorage.setItem(OFFLINE_RECENT_KEY, JSON.stringify(recents)); return recents; }
+  function getRecentSearches() { return JSON.parse(localStorage.getItem(OFFLINE_RECENT_KEY) || "[]"); }
+  function clearRecentSearches() { localStorage.setItem(OFFLINE_RECENT_KEY, JSON.stringify([])); }
+  function renderOfflineMode() {
+    return `<div class="offline-header"><div class="offline-badge"><i class="fas fa-download"></i> Offline Mode Active</div><h2><i class="fas fa-search"></i> Offline Legal Search</h2><div class="offline-sub">Search legal information without internet. All data is stored locally on your device.</div></div><div class="offline-search-box"><i class="fas fa-search"></i><input type="text" id="offlineSearchInput" placeholder="e.g., theft, FIR, harassment, bail..."><button id="offlineSearchBtn" style="background:transparent; border:none; color:#60a5fa; cursor:pointer;"><i class="fas fa-arrow-right"></i></button></div><div class="recent-searches" id="recentSearchesPanel"><div class="recent-header"><span>Recent Searches</span><span id="clearRecentBtn" style="cursor:pointer; color:#f87171;">Clear</span></div><div class="recent-tags" id="recentTags"></div></div><div id="offlineResultPanel"></div><div class="faq-section"><div class="faq-title"><i class="fas fa-question-circle"></i> Offline FAQ — Common Legal Questions</div><div class="faq-list" id="faqList"><div class="faq-item"><div class="faq-question">How to report theft / file FIR? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Visit nearest police station with CNIC. Write complaint. Obtain FIR copy free.</div></div><div class="faq-item"><div class="faq-question">What documents are needed for FIR? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">CNIC, evidence, witness details.</div></div><div class="faq-item"><div class="faq-question">How to contact cybercrime wing? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Call 1991.</div></div><div class="faq-item"><div class="faq-question">What is bail procedure? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Apply through court.</div></div><div class="faq-item"><div class="faq-question">What to do in domestic violence? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Call 1043, file FIR.</div></div><div class="faq-item"><div class="faq-question">What are constitutional rights? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Rights under Constitution of Pakistan.</div></div></div></div>`;
+  }
+  function updateRecentTags() { const recents = getRecentSearches(); const container = document.getElementById("recentTags"); if (!container) return; container.innerHTML = recents.map(term => `<span class="recent-tag" data-term="${term}">${term}</span>`).join(''); document.querySelectorAll('.recent-tag').forEach(tag => { tag.addEventListener('click', () => { performOfflineSearch(tag.getAttribute('data-term')); }); }); }
+  function performOfflineSearch(query) { if (!query.trim()) return; const result = getOfflineSearchResult(query); saveRecentSearch(query); updateRecentTags(); const panel = document.getElementById("offlineResultPanel"); panel.innerHTML = `<div class="search-result"><div class="result-title">${result.title}</div><div class="result-law">📜 ${result.law}</div><div class="result-desc">${result.desc}</div><div class="result-penalty">⚖️ Penalty: ${result.penalty}</div></div>`; }
+  function attachOfflineEvents() {
+    const searchInput = document.getElementById("offlineSearchInput");
+    const searchBtn = document.getElementById("offlineSearchBtn");
+    const clearBtn = document.getElementById("clearRecentBtn");
+    function handleSearch() { if (searchInput) performOfflineSearch(searchInput.value); }
+    if (searchBtn) searchBtn.addEventListener("click", handleSearch);
+    if (searchInput) searchInput.addEventListener("keypress", (e) => { if (e.key === "Enter") handleSearch(); });
+    if (clearBtn) clearBtn.addEventListener("click", () => { clearRecentSearches(); updateRecentTags(); showMessage("Recent searches cleared", "success", "offlineMsg"); });
+    updateRecentTags();
+    document.querySelectorAll('.faq-item').forEach(item => { const q = item.querySelector('.faq-question'); const a = item.querySelector('.faq-answer'); q.addEventListener('click', () => { a.classList.toggle('show'); const icon = q.querySelector('i'); if (icon) icon.classList.toggle('fa-chevron-down'); if (icon) icon.classList.toggle('fa-chevron-up'); }); });
+    const mainDiv = document.querySelector(".dashboard-main");
+    if (mainDiv && !document.getElementById("offlineMsg")) { const msgDiv = document.createElement("div"); msgDiv.id = "offlineMsg"; msgDiv.className = "message-area"; msgDiv.style.marginTop = "1rem"; mainDiv.appendChild(msgDiv); }
+  }
+
+  // *****************************
+  // QUIZ MODULE (unchanged)
+  // *****************************
+  const quizQuestionsData = [
+    { id: 1, text: "Section 354 PPC covers?", topic: "Harassment (PPC)", options: ["Assault on woman's modesty", "Murder", "Theft"], correct: 0 },
+    { id: 2, text: "FIA Cyber Wing helpline?", topic: "Cybercrime (PECA)", options: ["1991", "15", "1122"], correct: 0 },
+    { id: 3, text: "Industrial Relations Act year?", topic: "Labor Law", options: ["2012", "2000", "1990"], correct: 0 },
+    { id: 4, text: "Article 28 of Pakistan Constitution?", topic: "Constitutional Rights", options: ["Equality before law", "Freedom of speech", "Right to life"], correct: 0 },
+    { id: 5, text: "Article 9 guarantees?", topic: "Constitutional Rights", options: ["Right to life & liberty", "Freedom of religion", "Right to education"], correct: 0 },
+    { id: 6, text: "Which section of PPC deals with theft?", topic: "Criminal Law", options: ["Section 378", "Section 302", "Section 420"], correct: 0 },
+    { id: 7, text: "Maximum punishment for murder under PPC?", topic: "Criminal Law", options: ["Death penalty", "Life imprisonment", "Both A and B"], correct: 2 },
+    { id: 8, text: "Which act deals with cyber crimes in Pakistan?", topic: "Cybercrime (PECA)", options: ["PECA 2016", "PPC 1860", "CrPC 1898"], correct: 0 },
+    { id: 9, text: "Women helpline number?", topic: "Harassment (PPC)", options: ["1043", "1991", "1122"], correct: 0 },
+    { id: 10, text: "Under which article can a citizen challenge a law in court?", topic: "Constitutional Rights", options: ["Article 8", "Article 19", "Article 25"], correct: 0 },
+    { id: 11, text: "Which section of PPC defines qatl-e-amd (murder)?", topic: "Criminal Law", options: ["Section 302", "Section 324", "Section 337"], correct: 0 },
+    { id: 12, text: "Who appoints the Chief Justice of Pakistan?", topic: "Constitutional Rights", options: ["President", "Prime Minister", "Parliament"], correct: 0 },
+    { id: 13, text: "What is the punishment for cyber harassment under PECA?", topic: "Cybercrime (PECA)", options: ["Up to 3 years imprisonment", "Fine only", "Death penalty"], correct: 0 },
+    { id: 14, text: "Which law governs property transfer in Pakistan?", topic: "Property Law", options: ["Transfer of Property Act 1882", "Land Revenue Act", "Registration Act 1908"], correct: 0 },
+    { id: 15, text: "Under Muslim Family Law, what is the waiting period (iddat) for divorce?", topic: "Family Law", options: ["90 days", "3 months", "4 months 10 days"], correct: 1 },
+    { id: 16, text: "What is the minimum age for marriage under the Child Marriage Restraint Act?", topic: "Family Law", options: ["16 for females, 18 for males", "18 for both", "14 for females, 16 for males"], correct: 0 },
+    { id: 17, text: "Which section of PPC deals with qatl-e-khata (unintentional murder)?", topic: "Criminal Law", options: ["Section 322", "Section 323", "Section 324"], correct: 0 },
+    { id: 18, text: "Who is the head of state in Pakistan?", topic: "Constitutional Rights", options: ["President", "Prime Minister", "Chief Justice"], correct: 0 },
+    { id: 19, text: "What is the legal drinking age in Pakistan?", topic: "Criminal Law", options: ["Prohibited for Muslims", "21 years", "18 years"], correct: 0 },
+    { id: 20, text: "Which article of the Constitution protects against forced labor?", topic: "Constitutional Rights", options: ["Article 11", "Article 14", "Article 18"], correct: 0 }
+  ];
+
+  let currentSelectedTopic = "All Topics";
+  let userAnswers = {};
+  let quizSubmitted = false;
+
+  function getFilteredQuestions() {
+    if (currentSelectedTopic === "All Topics") return quizQuestionsData;
+    return quizQuestionsData.filter(q => q.topic === currentSelectedTopic);
+  }
+
+  function getProgressText() {
+    const filtered = getFilteredQuestions();
+    let answered = 0;
+    let correct = 0;
+    filtered.forEach(q => {
+      const ans = userAnswers[q.id];
+      if (ans !== undefined) {
+        answered++;
+        if (ans === q.correct) correct++;
+      }
+    });
+    return { answered, correct, total: filtered.length };
+  }
+
+  function renderQuiz() {
+    const filtered = getFilteredQuestions();
+    const { answered, correct, total } = getProgressText();
+    const scoreDisplay = quizSubmitted ? `${correct} / ${total} Correct` : `${answered} / ${total} Answered`;
+    return `
+      <div class="quiz-header">
+        <h2><i class="fas fa-question-circle"></i> Legal Knowledge Quiz</h2>
+        <div class="quiz-sub">Test your understanding of Pakistani law.</div>
+      </div>
+      <div class="topic-selector">
+        <label><i class="fas fa-filter"></i> SELECT TOPIC</label>
+        <select id="quizTopicSelect">
+          <option value="All Topics" ${currentSelectedTopic === "All Topics" ? "selected" : ""}>All Topics (${quizQuestionsData.length} questions)</option>
+          <option value="Harassment (PPC)" ${currentSelectedTopic === "Harassment (PPC)" ? "selected" : ""}>Harassment (PPC)</option>
+          <option value="Cybercrime (PECA)" ${currentSelectedTopic === "Cybercrime (PECA)" ? "selected" : ""}>Cybercrime (PECA)</option>
+          <option value="Criminal Law" ${currentSelectedTopic === "Criminal Law" ? "selected" : ""}>Criminal Law</option>
+          <option value="Family Law" ${currentSelectedTopic === "Family Law" ? "selected" : ""}>Family Law</option>
+          <option value="Property Law" ${currentSelectedTopic === "Property Law" ? "selected" : ""}>Property Law</option>
+          <option value="Labor Law" ${currentSelectedTopic === "Labor Law" ? "selected" : ""}>Labor Law</option>
+          <option value="Constitutional Rights" ${currentSelectedTopic === "Constitutional Rights" ? "selected" : ""}>Constitutional Rights</option>
+        </select>
+      </div>
+      <div class="quiz-progress">
+        <div class="progress-score">${scoreDisplay}</div>
+      </div>
+      <div class="questions-container" id="questionsContainer"></div>
+      <div class="quiz-actions">
+        <button id="submitQuizBtn" class="quiz-btn">Submit Quiz</button>
+        <button id="restartQuizBtn" class="quiz-btn">Restart Quiz</button>
+      </div>
+      <div id="quizResultArea"></div>
+    `;
+  }
+
+  function renderQuestions() {
+    const filtered = getFilteredQuestions();
+    const container = document.getElementById("questionsContainer");
+    if (!container) return;
+    container.innerHTML = filtered.map((q, idx) => {
+      const selected = userAnswers[q.id];
+      return `
+        <div class="question-card" data-qid="${q.id}">
+          <div class="question-text">${idx+1}. ${q.text}</div>
+          <div class="options">
+            ${q.options.map((opt, optIdx) => {
+              let isSelected = (selected === optIdx);
+              let additionalClass = "";
+              let statusIcon = "";
+              if (quizSubmitted) {
+                if (optIdx === q.correct) {
+                  additionalClass = "correct-mark";
+                  statusIcon = '<i class="fas fa-check-circle" style="color:#22c55e;"></i>';
+                } else if (isSelected && optIdx !== q.correct) {
+                  additionalClass = "wrong-mark";
+                  statusIcon = '<i class="fas fa-times-circle" style="color:#ef4444;"></i>';
+                }
+              } else {
+                if (isSelected) {
+                  additionalClass = "selected";
+                }
+              }
+              return `
+                <div class="option ${additionalClass}" data-qid="${q.id}" data-opt="${optIdx}">
+                  <span class="option-letter">${String.fromCharCode(65+optIdx)}.</span>
+                  <span class="option-text">${opt}</span>
+                  <span class="option-status">${statusIcon}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+    if (!quizSubmitted) {
+      document.querySelectorAll('.option').forEach(optDiv => {
+        optDiv.addEventListener('click', (e) => {
+          const qid = parseInt(optDiv.getAttribute('data-qid'));
+          const optIdx = parseInt(optDiv.getAttribute('data-opt'));
+          userAnswers[qid] = optIdx;
+          renderQuestions();
+          const { answered, correct, total } = getProgressText();
+          const progressDiv = document.querySelector('.quiz-progress');
+          if (progressDiv) {
+            progressDiv.innerHTML = `<div class="progress-score">${answered} / ${total} Answered</div>`;
+          }
+        });
+      });
+    }
+  }
+
+  function attachQuizEvents() {
+    const topicSelect = document.getElementById("quizTopicSelect");
+    if (topicSelect) {
+      topicSelect.addEventListener("change", (e) => {
+        currentSelectedTopic = e.target.value;
+        userAnswers = {};
+        quizSubmitted = false;
+        const mainDiv = document.querySelector(".dashboard-main");
+        if (mainDiv) {
+          mainDiv.innerHTML = renderQuiz();
+          attachQuizEvents();
+        }
+      });
+    }
+    renderQuestions();
+    const submitBtn = document.getElementById("submitQuizBtn");
+    const restartBtn = document.getElementById("restartQuizBtn");
+    const resultArea = document.getElementById("quizResultArea");
+    if (submitBtn) {
+      submitBtn.addEventListener("click", () => {
+        if (quizSubmitted) return;
+        const filtered = getFilteredQuestions();
+        let correctCount = 0;
+        filtered.forEach(q => {
+          if (userAnswers[q.id] === q.correct) correctCount++;
+        });
+        quizSubmitted = true;
+        renderQuestions();
+        const total = filtered.length;
+        let feedback = "";
+        if (correctCount === total) feedback = "Excellent! Perfect score!";
+        else if (correctCount >= total * 0.7) feedback = "Good effort! Review the missed answers to improve.";
+        else feedback = "Keep learning! Use our Learner Mode to study more.";
+        resultArea.innerHTML = `
+          <div class="result-card">
+            <div class="result-score">${correctCount} / ${total} Correct</div>
+            <div class="result-feedback">${feedback}</div>
+          </div>
+        `;
+        const progressDiv = document.querySelector('.quiz-progress');
+        if (progressDiv) {
+          progressDiv.innerHTML = `<div class="progress-score">${correctCount} / ${total} Correct</div>`;
+        }
+      });
+    }
+    if (restartBtn) {
+      restartBtn.addEventListener("click", () => {
+        userAnswers = {};
+        quizSubmitted = false;
+        if (resultArea) resultArea.innerHTML = "";
+        renderQuestions();
+        const { answered, correct, total } = getProgressText();
+        const progressDiv = document.querySelector('.quiz-progress');
+        if (progressDiv) {
+          progressDiv.innerHTML = `<div class="progress-score">${answered} / ${total} Answered</div>`;
+        }
+      });
+    }
+    const mainDiv = document.querySelector(".dashboard-main");
+    if (mainDiv && !document.getElementById("quizMsg")) {
+      const msgDiv = document.createElement("div");
+      msgDiv.id = "quizMsg";
+      msgDiv.className = "message-area";
+      msgDiv.style.marginTop = "1rem";
+      mainDiv.appendChild(msgDiv);
+    }
+  }
+
+  // *****************************
+  // HISTORY VIEW (unchanged)
+  // *****************************
+  function renderHistory() {
+    const history = getHistory();
+    const count = history.length;
+    if (count === 0) {
+      return `
+        <div class="history-header">
+          <h2><i class="fas fa-history"></i> Consultation History</h2>
+        </div>
+        <div class="history-stats">
+          <span>0 entries recorded</span>
+          <button id="clearHistoryBtn" class="clear-history-btn" disabled style="opacity:0.5;">Clear History</button>
+        </div>
+        <div class="history-list">
+          <div style="text-align:center; padding:2rem;">No History Yet<br>Your legal consultations and risk analyses will appear here.</div>
+        </div>
+      `;
+    }
+    let itemsHtml = '';
+    history.forEach(entry => {
+      let borderClass = '';
+      if (entry.type === 'risk') borderClass = 'history-item-risk';
+      else if (entry.type === 'ai') borderClass = 'history-item-ai';
+      else if (entry.type === 'user') borderClass = 'history-item-user';
+      itemsHtml += `
+        <div class="history-item ${borderClass}">
+          <div class="history-title">
+            <span>${entry.title}</span>
+            <span class="history-time">${entry.timestamp}</span>
+          </div>
+          <div class="history-content">${entry.content}</div>
+        </div>
+      `;
+    });
+    return `
+      <div class="history-header">
+        <h2><i class="fas fa-history"></i> Consultation History</h2>
+      </div>
+      <div class="history-stats">
+        <span>${count} entries recorded</span>
+        <button id="clearHistoryBtn" class="clear-history-btn">Clear History</button>
+      </div>
+      <div class="history-list">
+        ${itemsHtml}
+      </div>
+    `;
+  }
+
+  function attachHistoryEvents() {
+    const clearBtn = document.getElementById("clearHistoryBtn");
+    if (clearBtn && clearBtn.disabled !== true) {
+      clearBtn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to clear all history?")) {
+          clearHistory();
+          const mainDiv = document.querySelector(".dashboard-main");
+          if (mainDiv) mainDiv.innerHTML = renderHistory();
+          attachHistoryEvents();
+          showMessage("History cleared", "success", "historyMsg");
+        }
+      });
+    }
+    const mainDiv = document.querySelector(".dashboard-main");
+    if (mainDiv && !document.getElementById("historyMsg")) {
+      const msgDiv = document.createElement("div");
+      msgDiv.id = "historyMsg";
+      msgDiv.className = "message-area";
+      msgDiv.style.marginTop = "1rem";
+      mainDiv.appendChild(msgDiv);
+    }
+  }
+
+  // *****************************
+  // HOME VIEW (UPDATED: search bar redirects to AI Consult with query)
+  // *****************************
+  function renderHomeView() {
+    return `<div class="search-area"><div class="search-bar"><i class="fas fa-search"></i><input type="text" id="homeSearchInput" placeholder="Describe your legal situation... (e.g., 'My landlord is refusing to return security deposit')"></div></div><div class="chips-row"><span class="chip">Harassment</span><span class="chip">Assault</span><span class="chip">Domestic Violence</span><span class="chip">Cyberbullying</span><span class="chip">Theft</span><span class="chip">Bail</span><span class="chip">Fraud</span></div><div class="cards-grid"><div class="dashboard-card" data-card="ai-consult"><div class="card-icon"><i class="fas fa-robot" style="color:#3b82f6"></i></div><h4>AI Consult</h4><p>Describe your legal issue — instant guidance.</p></div><div class="dashboard-card" data-card="fir-draft"><div class="card-icon"><i class="fas fa-file-alt" style="color:#6366f1"></i></div><h4>FIR Draft</h4><p>Generate legal documents & structured FIR.</p></div><div class="dashboard-card" data-card="risk-detection"><div class="card-icon"><i class="fas fa-shield-alt" style="color:#f97316"></i></div><h4>Risk Detection</h4><p>Assess situation severity & legal risks.</p></div><div class="dashboard-card" data-card="helplines"><div class="card-icon"><i class="fas fa-phone-alt" style="color:#ef4444"></i></div><h4>Helplines</h4><p>Emergency contacts & legal aid numbers.</p></div><div class="dashboard-card" data-card="learner-mode"><div class="card-icon"><i class="fas fa-graduation-cap" style="color:#10b981"></i></div><h4>Learner Mode</h4><p>Learn Pakistani law, know your rights.</p></div><div class="dashboard-card" data-card="offline-mode"><div class="card-icon"><i class="fas fa-download" style="color:#6b7280"></i></div><h4>Offline Mode</h4><p>Search legal information without internet.</p></div><div class="dashboard-card" data-card="quiz"><div class="card-icon"><i class="fas fa-gamepad" style="color:#a855f7"></i></div><h4>Legal Quiz</h4><p>Test your knowledge about legal procedures.</p></div><div class="dashboard-card" data-card="history"><div class="card-icon"><i class="fas fa-history" style="color:#f59e0b"></i></div><h4>History</h4><p>View your consultation history.</p></div></div><div class="safety-note"><i class="fas fa-shield-heart"></i> Safety First: This app provides general legal information based on Pakistani law. For emergencies, call 15 (Police) or 1122 (Rescue).</div><div id="globalDashboardMsg" class="message-area" style="margin-top:12px;"></div>`;
+  }
+
+  function attachHomeEvents(switchFn) {
+    document.querySelectorAll(".dashboard-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const title = card.querySelector("h4")?.innerText;
+        if (title === "AI Consult") switchFn('ai-consult');
+        else if (title === "Learner Mode") switchFn('learner-mode');
+        else if (title === "FIR Draft") switchFn('fir-draft');
+        else if (title === "Helplines") switchFn('helplines');
+        else if (title === "Offline Mode") switchFn('offline-mode');
+        else if (title === "Risk Detection") switchFn('risk-detection');
+        else if (title === "Legal Quiz") switchFn('quiz');
+        else if (title === "History") switchFn('history');
+        else showMessage(`✨ "${title}" feature — coming soon.`, "success", "globalDashboardMsg");
+      });
+    });
+    document.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => showMessage(`🔍 Searching for ${chip.innerText}`, "success", "globalDashboardMsg")));
+    
+    // Enhanced search bar: redirect to AI Consult with the query and auto-submit
+    const searchInput = document.getElementById("homeSearchInput");
+    if (searchInput) {
+      searchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          const query = searchInput.value.trim();
+          if (query) {
+            // Navigate to AI Consult
+            switchFn('ai-consult');
+            // After a short delay, fill the input and trigger send
+            setTimeout(() => {
+              const consultInput = document.getElementById("consultInput");
+              const sendBtn = document.getElementById("sendConsultBtn");
+              if (consultInput && sendBtn) {
+                consultInput.value = query;
+                sendBtn.click();
+              } else {
+                // Fallback: show message
+                showMessage(`Redirected to AI Consult. Please type: "${query}" there.`, "success", "globalDashboardMsg");
+              }
+            }, 300);
+          } else {
+            showMessage("Please describe your situation first.", "error", "globalDashboardMsg");
+          }
+        }
+      });
+    }
+  }
+
+  // *****************************
+  // DASHBOARD VIEW SWITCHING (updated: removed Maturity & Feedback)
+  // *****************************
+  let currentView = 'home';
+  function switchView(view) {
+    currentView = view;
+    const mainDiv = document.querySelector(".dashboard-main");
+    if (!mainDiv) return;
+    if (view === 'home') { mainDiv.innerHTML = renderHomeView(); attachHomeEvents(switchView); }
+    else if (view === 'ai-consult') { mainDiv.innerHTML = renderAIConsult(); attachConsultEvents(); }
+    else if (view === 'learner-mode') { mainDiv.innerHTML = renderLearnerMode(); attachLearnerEvents(); }
+    else if (view === 'fir-draft') { mainDiv.innerHTML = renderFIRDraft(); attachFIREvents(); }
+    else if (view === 'helplines') { mainDiv.innerHTML = renderHelplines(); attachHelplinesEvents(); }
+    else if (view === 'offline-mode') { mainDiv.innerHTML = renderOfflineMode(); attachOfflineEvents(); }
+    else if (view === 'risk-detection') { mainDiv.innerHTML = renderRiskDetection(); attachRiskEvents(); }
+    else if (view === 'quiz') { mainDiv.innerHTML = renderQuiz(); attachQuizEvents(); }
+    else if (view === 'history') { mainDiv.innerHTML = renderHistory(); attachHistoryEvents(); }
+    else if (view === 'settings') { mainDiv.innerHTML = renderSettings(); attachSettingsEvents(); }
+    else if (view === 'profile-settings') { mainDiv.innerHTML = renderProfileSettings(); attachProfileSettingsEvents(); }
+    else if (view === 'settings-language') { mainDiv.innerHTML = renderLanguageSettings(); attachLanguageSettingsEvents(); }
+    else if (view === 'settings-emergency') { mainDiv.innerHTML = renderEmergencySettings(); attachEmergencySettingsEvents(); }
+    else if (view === 'settings-privacy') { mainDiv.innerHTML = renderPrivacySettings(); attachPrivacySettingsEvents(); }
+    else { mainDiv.innerHTML = `<div style="text-align:center;padding:2rem;"><i class="fas fa-code-branch"></i> <h3>${view.replace('-',' ').toUpperCase()}</h3><p>This feature is coming soon.</p></div>`; }
+  }
+
+  function renderSettings() {
+    const user = getCurrentUser();
+    const displayName = user ? user.fullName : "Demo User";
+    const userEmail = user ? user.email : "demo@example.com";
+    const avatarLetter = displayName.charAt(0).toUpperCase();
+    return `
+      <div class="settings-container">
+        <div class="settings-profile">
+          <div class="profile-info">
+            <div class="profile-avatar">${avatarLetter}</div>
+            <div class="profile-details">
+              <h3>${displayName}</h3>
+              <p>${userEmail}</p>
+            </div>
+          </div>
+          <button id="settingsSignOutBtn" class="settings-signout"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </div>
+        <div class="settings-menu">
+          <div class="settings-item" data-setting="profile">
+            <div class="settings-icon"><i class="fas fa-user-edit"></i></div>
+            <div class="settings-text">
+              <h4>Profile Settings</h4>
+              <p>Manage your account details</p>
+            </div>
+            <div class="settings-arrow"><i class="fas fa-chevron-right"></i></div>
+          </div>
+          <div class="settings-item" data-setting="language">
+            <div class="settings-icon"><i class="fas fa-globe"></i></div>
+            <div class="settings-text">
+              <h4>Language & Themes</h4>
+              <p>Customize language and appearance</p>
+            </div>
+            <div class="settings-arrow"><i class="fas fa-chevron-right"></i></div>
+          </div>
+          <div class="settings-item" data-setting="emergency">
+            <div class="settings-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="settings-text">
+              <h4>Emergency & SOS</h4>
+              <p>Set up emergency contacts and SOS</p>
+            </div>
+            <div class="settings-arrow"><i class="fas fa-chevron-right"></i></div>
+          </div>
+          <div class="settings-item" data-setting="privacy">
+            <div class="settings-icon"><i class="fas fa-lock"></i></div>
+            <div class="settings-text">
+              <h4>Privacy & Security</h4>
+              <p>Control your data and security</p>
+            </div>
+            <div class="settings-arrow"><i class="fas fa-chevron-right"></i></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function attachSettingsEvents() {
+    const signOutBtn = document.getElementById("settingsSignOutBtn");
+    if (signOutBtn) {
+      signOutBtn.addEventListener("click", () => {
+        setCurrentUser(null);
+        renderAuthByState();
+        showMessage("Signed out successfully", "success", "settingsMsg");
+      });
+    }
+    const settingItems = document.querySelectorAll(".settings-item");
+    settingItems.forEach(item => {
+      item.addEventListener("click", () => {
+        const setting = item.getAttribute("data-setting");
+        if (setting === "profile") {
+          switchView('profile-settings');
+        } else if (setting === "language") {
+          switchView('settings-language');
+        } else if (setting === "emergency") {
+          switchView('settings-emergency');
+        } else if (setting === "privacy") {
+          switchView('settings-privacy');
+        } else {
+          showMessage("This feature is coming soon.", "success", "settingsMsg");
+        }
+      });
+    });
+    const mainDiv = document.querySelector(".dashboard-main");
+    if (mainDiv && !document.getElementById("settingsMsg")) {
+      const msgDiv = document.createElement("div");
+      msgDiv.id = "settingsMsg";
+      msgDiv.className = "message-area";
+      msgDiv.style.marginTop = "1rem";
+      mainDiv.appendChild(msgDiv);
+    }
+  }
+
+  function renderDashboardFull(user) {
+    const displayName = user.fullName || user.email.split('@')[0];
+    const sidebarHtml = `<div class="dashboard-sidebar"><div style="padding:0 1rem 1rem; border-bottom:1px solid rgba(255,255,255,0.1);"><div style="display:flex; align-items:center; gap:12px;"><div class="profile-avatar" style="width:40px; height:40px; background:#2563eb; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">${displayName.charAt(0).toUpperCase()}</div><div class="profile-details"><div style="font-weight:600;">${displayName}</div><div style="font-size:0.7rem; color:#8e9fc3;">${user.email}</div></div></div></div><ul class="sidebar-menu"><li data-nav="home"><i class="fas fa-home" style="color:#60a5fa"></i> Home</li><li data-nav="ai-consult"><i class="fas fa-comments" style="color:#3b82f6"></i> AI Consult</li><li data-nav="learner-mode"><i class="fas fa-graduation-cap" style="color:#10b981"></i> Learner Mode</li><li data-nav="fir-draft"><i class="fas fa-file-signature" style="color:#6366f1"></i> FIR Draft</li><li data-nav="helplines"><i class="fas fa-phone-alt" style="color:#ef4444"></i> Helplines</li><li data-nav="risk-detection"><i class="fas fa-chart-line" style="color:#f97316"></i> Risk Detection</li><li data-nav="offline-mode"><i class="fas fa-download" style="color:#6b7280"></i> Offline Mode</li><li data-nav="quiz"><i class="fas fa-gamepad" style="color:#a855f7"></i> Quiz</li><li data-nav="history"><i class="fas fa-history" style="color:#f59e0b"></i> History</li><li data-nav="settings"><i class="fas fa-cog" style="color:#94a3b8"></i> Settings</li></ul><ul class="sidebar-menu logout-sidebar"><li class="light-mode-item"><i class="fas fa-sun"></i> Light Mode</li><li id="dashboardLogoutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</li></ul></div><div class="dashboard-main" id="dynamicMain"></div>`;
+    authContainer.innerHTML = `<div class="dashboard-container"><div class="dashboard-inner">${sidebarHtml}</div></div>`;
+    document.querySelectorAll(".sidebar-menu li[data-nav]").forEach(el => { el.addEventListener("click", () => switchView(el.getAttribute("data-nav"))); });
+    document.querySelectorAll(".sidebar-menu li:not([data-nav]):not(#dashboardLogoutBtn)").forEach(el => { el.addEventListener("click", () => showMessage(`✨ "${el.innerText.trim()}" feature — coming soon.`, "success", "globalDashboardMsg")); });
+    document.getElementById("dashboardLogoutBtn")?.addEventListener("click", () => { setCurrentUser(null); renderAuthByState(); });
+    document.querySelector(".light-mode-item")?.addEventListener("click", () => showMessage("🌞 Light Mode coming soon!", "success", "globalDashboardMsg"));
+    switchView(currentView);
+  }
+
+  // AUTH UI RENDER (unchanged)
+  function renderSignInForm() { return `<div class="auth-title"><i class="fas fa-key"></i> Sign In to Legal Assistant</div><div class="toggle-buttons"><button class="toggle-btn ${activeFormType==='signin'?'active':''}" data-form="signin">Sign In</button><button class="toggle-btn ${activeFormType==='signup'?'active':''}" data-form="signup">Create Account</button></div><form id="signinForm" class="auth-form"><div class="input-group"><label><i class="fas fa-envelope"></i> EMAIL ADDRESS</label><input type="email" id="signinEmail" placeholder="you@example.com"></div><div class="input-group"><label><i class="fas fa-lock"></i> PASSWORD</label><input type="password" id="signinPassword" placeholder="Min. 4 characters"></div><button type="submit" class="btn-primary"><i class="fas fa-sign-in-alt"></i> Sign In</button><div class="demo-note"><i class="fas fa-info-circle"></i> Demo: demo@example.com / demo123</div></form><div id="dynamicMessage" class="message-area"></div>`; }
+  function renderSignUpForm() { return `<div class="auth-title"><i class="fas fa-user-plus"></i> Create Your Account</div><div class="toggle-buttons"><button class="toggle-btn ${activeFormType==='signin'?'active':''}" data-form="signin">Sign In</button><button class="toggle-btn ${activeFormType==='signup'?'active':''}" data-form="signup">Create Account</button></div><form id="signupForm" class="auth-form"><div class="input-group"><label><i class="fas fa-user"></i> FULL NAME</label><input type="text" id="signupFullname" placeholder="Your full name"></div><div class="input-group"><label><i class="fas fa-envelope"></i> EMAIL ADDRESS</label><input type="email" id="signupEmail" placeholder="you@example.com"></div><div class="input-group"><label><i class="fas fa-lock"></i> PASSWORD</label><input type="password" id="signupPassword" placeholder="Min. 4 characters"></div><div class="input-group"><label><i class="fas fa-check-circle"></i> CONFIRM PASSWORD</label><input type="password" id="signupConfirm" placeholder="Repeat password"></div><button type="submit" class="btn-primary"><i class="fas fa-user-check"></i> Register & Sign In</button></form><div id="dynamicMessage" class="message-area"></div>`; }
+  function attachSignInEvents() { const form = document.getElementById("signinForm"); if(form) form.addEventListener("submit", async (e)=>{ e.preventDefault(); const email=document.getElementById("signinEmail").value.trim(); const password=document.getElementById("signinPassword").value; const result = await apiLogin(email, password); if(result.success){ setCurrentUser({fullName:result.user.fullName, email:result.user.email}); showMessage(result.message,"success","dynamicMessage"); renderAuthByState(); } else showMessage(result.message,"error","dynamicMessage"); }); }
+  function attachSignUpEvents() { const form = document.getElementById("signupForm"); if(form) form.addEventListener("submit",(e)=>{ e.preventDefault(); const fullName=document.getElementById("signupFullname").value.trim(); const email=document.getElementById("signupEmail").value.trim(); const pwd=document.getElementById("signupPassword").value; const confirm=document.getElementById("signupConfirm").value; const reg=registerUser(fullName,email,pwd,confirm); if(reg.success){ setCurrentUser({fullName:reg.user.fullName,email:reg.user.email}); showMessage(reg.message,"success","dynamicMessage"); renderAuthByState(); } else showMessage(reg.message,"error","dynamicMessage"); }); }
+  function attachToggleEvents() { document.querySelectorAll(".toggle-btn").forEach(btn=>{ btn.addEventListener("click",()=>{ activeFormType=btn.getAttribute("data-form"); renderAuthByState(); }); }); }
+  function renderAuthByState() { const user = getCurrentUser(); if (user) { introBoxesDiv.classList.add("hidden"); currentView = 'home'; renderDashboardFull(user); } else { introBoxesDiv.classList.remove("hidden"); if (activeFormType === "signin") { authContainer.innerHTML = renderSignInForm(); attachSignInEvents(); } else { authContainer.innerHTML = renderSignUpForm(); attachSignUpEvents(); } attachToggleEvents(); } }
+  function initializeDemoUserConsistency() { const users = loadUsers(); if(!users.some(u=>u.email==="demo@example.com")) users.push({ fullName: "Demo User", email: "demo@example.com", password: "demo123" }); saveUsers(users); }
+  initTheme();
+  initializeDemoUserConsistency();
+  renderAuthByState();
+</script>
+</body>
+</html>
